@@ -1,52 +1,16 @@
-# Prerequisites
-*.d
+# 忽略根目录及所有子目录下的所有文件和文件夹
+*
+!*/
 
-# Object files
-*.o
-*.ko
-*.obj
-*.elf
+# 但不忽略User文件夹下的main.c文件
+!User/main.c
 
-# Linker output
-*.ilk
-*.map
-*.exp
+# 不忽略Hardware文件夹及其所有内容
+!Hardware/
 
-# Precompiled Headers
-*.gch
-*.pch
+!.git/
 
-# Libraries
-*.lib
-*.a
-*.la
-*.lo
 
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
-
-# Executables
-*.exe
-*.out
-*.app
-*.i*86
-*.x86_64
-*.hex
-
-# Debug files
-*.dSYM/
-*.su
-*.idb
-*.pdb
-
-# Kernel Module Compile Results
-*.mod*
-*.cmd
-.tmp_versions/
-modules.order
-Module.symvers
-Mkfile.old
-dkms.conf
+# 注意：由于" *"会忽略所有文件和文件夹，"!*/"用于重新包含所有空目录
+# 这是因为" *"会忽略目录本身，而"!Hardware/"仅表示不忽略Hardware目录及其内容，但不包括由"* "忽略的空目录
+# 如果你的项目结构保证Hardware不是空目录（即它至少包含一个文件或子目录），则"! */"可能是可选的
