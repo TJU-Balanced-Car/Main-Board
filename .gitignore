@@ -4,11 +4,12 @@
 
 # 但不忽略User文件夹下的main.c文件
 !User/main.c
+!User/system_ch32v30x.c
 
 # 不忽略Hardware文件夹及其所有内容
-!Hardware/
+!Hardware/*
 
-# !.git/
+# !.git/*
 !.gitignore
 
 # 注意：由于" *"会忽略所有文件和文件夹，"!*/"用于重新包含所有空目录

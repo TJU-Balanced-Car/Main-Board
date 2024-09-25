@@ -19,6 +19,7 @@
 */
 
 #include "debug.h"
+#include  "Servo.h"
 
 
 /* Global typedef */
@@ -44,6 +45,10 @@ int main(void)
 	printf("SystemClk:%d\r\n",SystemCoreClock);
 	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
 	printf("This is printf example\r\n");
+
+	Servo_PWM_Init();
+	Servo_SetAngle(90);
+
 
 	while(1)
     {
