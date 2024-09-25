@@ -5,7 +5,7 @@
  *      Author: jacob
  */
 
-#include "ch32v30x.h"
+#include "debug.h"
 
 //==========================================================
 //  º¯ÊýÃû³Æ£º   Servo_PWM_Init
