@@ -19,7 +19,8 @@
 */
 
 #include "debug.h"
-#include  "Servo.h"
+#include "Servo.h"
+#include "Buzzer.h"
 
 
 /* Global typedef */
@@ -48,6 +49,8 @@ int main(void)
 
 	Servo_PWM_Init();
 	Servo_SetAngle(90);
+	Buzzer_Init();
+	Buzzer_Stop();
 
 
 	while(1)
