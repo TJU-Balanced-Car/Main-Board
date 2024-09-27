@@ -21,6 +21,7 @@
 #include "debug.h"
 #include "Servo.h"
 #include "Buzzer.h"
+#include "Serial.h"
 
 
 /* Global typedef */
@@ -28,7 +29,7 @@
 /* Global define */
 
 /* Global Variable */
-
+uint8_t RxData;
 
 /*********************************************************************
  * @fn      main
@@ -39,23 +40,28 @@
  */
 int main(void)
 {
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+	//NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
 	SystemCoreClockUpdate();
 	Delay_Init();
-	USART_Printf_Init(115200);	
+	//USART_Printf_Init(115200);
 	printf("SystemClk:%d\r\n",SystemCoreClock);
 	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
-	printf("This is printf example\r\n");
+	printf("Run Successfully!\r\n");
 
 	Servo_PWM_Init();
 	Servo_SetAngle(90);
 	Buzzer_Init();
 	Buzzer_Stop();
+	Serial_Init();
 
 
 	while(1)
     {
-
+	    if (Serial_GetRxFlag() == 1)
+	    {
+	        RxData = Serial_GetRxData();
+	        printf(RxData);
+	    }
 	}
 }
 
