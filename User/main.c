@@ -22,6 +22,7 @@
 #include "Servo.h"
 #include "Buzzer.h"
 #include "Serial.h"
+#include "MPU6050.h"
 
 
 /* Global typedef */
@@ -30,6 +31,8 @@
 
 /* Global Variable */
 uint8_t RxData;
+uint8_t ID;
+int16_t AX, AY, AZ, GX, GY, GZ;
 
 /*********************************************************************
  * @fn      main
@@ -53,10 +56,15 @@ int main(void)
 	Buzzer_Init();
 	Buzzer_Stop();
 	Serial_Init();
+	MPU6050_Init();
 
 
 	while(1)
     {
+	    MPU6050_GetData(&AX, &AY, &AZ, &GX, &GY, &GZ);
+	    ID = MPU6050_GetID();
+	    printf("ID:%d, AX:%d, AY:%d, AZ:%d, GX:%d, GY:%d, GZ:%d", ID, AX, AY, AZ, GX, GY, GZ);
+
 	    if (Serial_GetRxFlag() == 1)
 	    {
 	        RxData = Serial_GetRxData();

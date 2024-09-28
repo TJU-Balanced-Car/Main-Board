@@ -5,7 +5,7 @@
  *      Author: jacob
  */
 
-#include <debug.h>
+#include "debug.h"
 #include <stdio.h>
 #include <stdarg.h>
 
@@ -22,7 +22,9 @@ void Serial_Init(void)
 {
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE); // 这里开启的是APB2的时钟，只有USART1用的是这个
                                                            // 其他USART串口需要另外使能APB1时钟
+    //RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE); // 使能GPIOA的时钟
+    //RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
 
     GPIO_InitTypeDef GPIO_InitStructure;
     // USART1_TX

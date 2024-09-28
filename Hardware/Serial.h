@@ -8,7 +8,7 @@
 #ifndef HARDWARE_SERIAL_H_
 #define HARDWARE_SERIAL_H_
 
-#include <stdio.h>
+//#include <stdio.h>
 
 void Serial_Init(void);
 void USART1_SendByte(uint8_t Byte);
