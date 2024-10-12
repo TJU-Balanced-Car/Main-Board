@@ -7,6 +7,12 @@
 
 #include "debug.h"
 
+//==========================================================
+//  函数名称：   Motor_PWM_Init
+//  函数功能：   初始化两个电机
+//  入口参数：   无
+//  返回参数：   无
+//==========================================================
 void Motor_PWM_Init(void)
 {
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM8, ENABLE); // 开启APB2外设时钟
@@ -14,10 +20,7 @@ void Motor_PWM_Init(void)
 
     GPIO_InitTypeDef GPIO_InitStructure; // GPIO初始化结构体
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP; // 引脚运行模式
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6; // 指定引脚
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7;
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9; // 指定引脚
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; // 引脚速度
     GPIO_Init(GPIOC, &GPIO_InitStructure); // GPIO初始化
 
@@ -51,27 +54,23 @@ void Motor_PWM_Init(void)
 }
 
 //==========================================================
-//  函数名称：   Servo_PWM_SetCompare
-//  函数功能：   设置舵机的PWM波占空比
-//  入口参数：   CCR的值
+//  函数名称：   Motor1_SetSpeed
+//  函数功能：   设置电机1转速
+//  入口参数：   电机转速，取值0~100
 //  返回参数：   无
 //==========================================================
-void Motor_PWM_SetCompare(uint16_t Compare)
+void Motor1_SetSpeed(float Speed)
 {
-    TIM_SetCompare3(TIM8, Compare); // 设置CCR的值，用于设置占空比
+    TIM_SetCompare1(TIM8, Speed * 2); // 电机转速为0~100
 }
 
 //==========================================================
-//  函数名称：   Servo_SetAngle
-//  函数功能：   设置舵机转向角度
-//  入口参数：   舵机转向角度，取值0~180
+//  函数名称：   Motor2_SetSpeed
+//  函数功能：   设置电机2转速
+//  入口参数：   电机转速，取值0~100
 //  返回参数：   无
 //==========================================================
-void Motor_SetAngle(float Angle)
+void Motor2_SetSpeed(float Speed)
 {
-    Servo_PWM_SetCompare(Angle / 180 * 20 + 5); // 舵机角度为0~180度
+    TIM_SetCompare3(TIM8, Speed * 2); // 电机转速为0~100
 }
-
-
-
-

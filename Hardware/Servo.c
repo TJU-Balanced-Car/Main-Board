@@ -22,7 +22,7 @@ void Servo_PWM_Init(void)
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP; // 引脚运行模式
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8; // 指定引脚
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; // 引脚速度
-    GPIO_Init(GPIOA, &GPIO_InitStructure); // GPIO初始化
+    GPIO_Init(GPIOB, &GPIO_InitStructure); // GPIO初始化
 
     TIM_InternalClockConfig(TIM4); // 选择内部时钟
 
@@ -53,7 +53,7 @@ void Servo_PWM_Init(void)
 //==========================================================
 //  函数名称：   Servo_PWM_SetCompare
 //  函数功能：   设置舵机的PWM波占空比
-//  入口参数：   CCR的值
+//  入口参数：   CCR的值，值取10~50（对应5%~25%）
 //  返回参数：   无
 //==========================================================
 void Servo_PWM_SetCompare(uint16_t Compare)
@@ -69,5 +69,5 @@ void Servo_PWM_SetCompare(uint16_t Compare)
 //==========================================================
 void Servo_SetAngle(float Angle)
 {
-    Servo_PWM_SetCompare(Angle / 180 * 20 + 5); // 舵机角度为0~180度
+    Servo_PWM_SetCompare(Angle / 180 * 40 + 10); // 舵机角度为0~180度
 }

@@ -9,7 +9,8 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-uint8_t Serial_RxData;
+uint8_t Serial_TxPacket[3];
+uint8_t Serial_RxPacket[3];
 uint8_t Serial_RxFlag;
 
 //==========================================================
@@ -25,6 +26,8 @@ void Serial_Init(void)
     //RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE); // 使能GPIOA的时钟
     //RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE); // 使能AFIO时钟，以使用重映射
+    GPIO_PinRemapConfig(GPIO_Remap_USART1, ENABLE); // 开启重映射
 
     GPIO_InitTypeDef GPIO_InitStructure;
     // USART1_TX
@@ -139,6 +142,7 @@ void USART1_SendNumber(uint32_t Number)
     }
 }
 
+/****************************************************************************/
 //==========================================================
 //  函数名称：   fputc
 //  函数功能：   重定向printf函数**至USART1串口**
@@ -150,6 +154,7 @@ int fputc(int ch, FILE *f)
     USART1_SendByte(ch);
     return ch;
 }
+/****************************************************************************/
 
 /******************************************************************************
 //==========================================================
@@ -186,14 +191,16 @@ uint8_t Serial_GetRxFlag(void)
 }
 
 //==========================================================
-//  函数名称：   Serial_GetRxData
-//  函数功能：   获取串口接收的数据，返回出去
+//  函数名称：   USART1_SendPacket
+//  函数功能：   通过USART1发送数据包
 //  入口参数：   无
-//  返回参数：   串口接收到的数据
+//  返回参数：   无
 //==========================================================
-uint8_t Serial_GetRxData(void)
+void USART1_SendPacket(void)
 {
-    return Serial_RxData;
+    USART1_SendByte(0xFF);
+    USART1_SendArray(Serial_TxPacket);
+    USART1_SendByte(0xFE);
 }
 
 //==========================================================
@@ -204,10 +211,36 @@ uint8_t Serial_GetRxData(void)
 //==========================================================
 void USART1_IRQHandler(void)
 {
+    static uint8_t RxState = 0;
+    static uint8_t pRxPacket = 0;
     if (USART_GetFlagStatus(USART1, USART_IT_RXNE) == SET)
     {
-        Serial_RxData = USART_ReceiveData(USART1);
-        Serial_RxFlag = 1;
+        uint8_t RxData = USART_ReceiveData(USART1);
+
+        if (RxState == 0)
+        {
+            if (RxData == 0xFF)
+            {
+                RxData = 1;
+                pRxPacket = 0;
+            }
+        }
+        else if (RxState == 1)
+        {
+            Serial_RxPacket[pRxPacket] = RxData;
+            pRxPacket ++;
+            if (pRxPacket >= 4) RxState = 2;
+
+        }
+        else if (RxState == 2)
+        {
+            if (RxData == 0xFE)
+            {
+                RxState = 0;
+                Serial_RxFlag = 1;
+            }
+        }
+
         USART_ClearITPendingBit(USART1, USART_IT_RXNE);
     }
 }
