@@ -20,8 +20,11 @@ void Motor_PWM_Init(void)
 
     GPIO_InitTypeDef GPIO_InitStructure; // GPIO初始化结构体
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP; // 引脚运行模式
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9; // 指定引脚
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_8; // 指定引脚
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; // 引脚速度
+    GPIO_Init(GPIOC, &GPIO_InitStructure); // GPIO初始化
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP; // 引脚运行模式
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7 | GPIO_Pin_9; // 指定引脚
     GPIO_Init(GPIOC, &GPIO_InitStructure); // GPIO初始化
 
     TIM_InternalClockConfig(TIM8); // 选择内部时钟
@@ -45,9 +48,7 @@ void Motor_PWM_Init(void)
                                         // *PWM占空比：Duty = CCR / (ARR + 1)
                                         // PWM分辨率：Reso = 1 / (ARR + 1)
     TIM_OC1Init(TIM8, &TIM_OCInitStructure); // 通道初始化
-    TIM_OC2Init(TIM8, &TIM_OCInitStructure);
     TIM_OC3Init(TIM8, &TIM_OCInitStructure);
-    TIM_OC4Init(TIM8, &TIM_OCInitStructure);
 
     TIM_Cmd(TIM8, ENABLE); // 启动定时器
 
@@ -61,7 +62,21 @@ void Motor_PWM_Init(void)
 //==========================================================
 void Motor1_SetSpeed(float Speed)
 {
-    TIM_SetCompare1(TIM8, Speed * 2); // 电机转速为0~100
+    TIM_SetCompare3(TIM8, Speed * 2 / 10); // 电机转速为0~100
+}
+
+//==========================================================
+//  函数名称：   Motor1_SetDir
+//  函数功能：   设置电机1转向
+//  入口参数：   转动方向，正向为1，反向为0
+//  返回参数：   无
+//==========================================================
+void Motor1_SetDir(uint8_t Dir)
+{
+    BitAction Bit;
+    if (Dir == 1) Bit = Bit_SET;
+    else if (Dir == 0) Bit = Bit_RESET;
+    GPIO_WriteBit(GPIOC, GPIO_Pin_9, Bit);
 }
 
 //==========================================================
@@ -72,5 +87,19 @@ void Motor1_SetSpeed(float Speed)
 //==========================================================
 void Motor2_SetSpeed(float Speed)
 {
-    TIM_SetCompare3(TIM8, Speed * 2); // 电机转速为0~100
+    TIM_SetCompare1(TIM8, Speed * 2 / 10); // 电机转速为0~100
+}
+
+//==========================================================
+//  函数名称：   Motor2_SetDir
+//  函数功能：   设置电机2转向
+//  入口参数：   转动方向，正向为1，反向为0
+//  返回参数：   无
+//==========================================================
+void Motor2_SetDir(uint8_t Dir)
+{
+    BitAction Bit;
+    if (Dir == 1) Bit = Bit_SET;
+    else if (Dir == 0) Bit = Bit_RESET;
+    GPIO_WriteBit(GPIOC, GPIO_Pin_7, Bit);
 }

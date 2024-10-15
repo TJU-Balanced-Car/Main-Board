@@ -24,6 +24,7 @@
 #include "Serial.h"
 #include "MPU6050.h"
 #include "TestLED.h"
+#include "Encoder.h"
 
 
 /* Global typedef */
@@ -50,6 +51,7 @@ int main(void)
       Buzzer_Stop();
       Test_LED_Init();
 //        Serial_Init();
+//      Encoder_Init();
     //  MPU6050_Init();
 
 	SystemCoreClockUpdate();
