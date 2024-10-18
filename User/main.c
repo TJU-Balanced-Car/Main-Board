@@ -21,8 +21,8 @@
 #include <debug.h>
 #include "Servo.h"
 //#include "Buzzer.h"
-//#include "Serial.h"
-//#include "MPU6050.h"
+#include "Serial.h"
+#include "MPU6050.h"
 #include "TestLED.h"
 //#include "Encoder.h"
 #include "Motor.h"
@@ -51,10 +51,10 @@ int main(void)
     //  Buzzer_Init();
     //  Buzzer_Stop();
       Test_LED_Init();
-//        Serial_Init();
+      Serial_Init();
 //      Encoder_Init();
-    //  MPU6050_Init();
-    Motor_Init();
+      MPU6050_Init();
+      Motor_Init();
 
 	SystemCoreClockUpdate();
 	Delay_Init();
@@ -75,9 +75,9 @@ int main(void)
 
 //        Motor1_SetSpeed(70);
 //        Motor1_SetDir(1);
-//        Delay_Ms(1000);
-//        USART_SendData(USART2, '1');
-//	    USART1_SendString("1");
+        Delay_Ms(5000);
+//        USART_SendData(/USART2, '1');
+//	    USART2_SendString("dsahgbksfjvk");
 //	    Motor1_SetDir(1);
 //	    Test_LED_Off();
 //	    Delay_Ms(10);
@@ -87,9 +87,9 @@ int main(void)
 //        Motor2_SetSpeed(70);
 //        Motor2_SetDir(1);
 	    //Test_LED_Off();
-//	    MPU6050_GetData(&AX, &AY, &AZ, &GX, &GY, &GZ);
-//	    ID = MPU6050_GetID();
-//	    printf("ID:%d, AX:%d, AY:%d, AZ:%d, GX:%d, GY:%d, GZ:%d", ID, AX, AY, AZ, GX, GY, GZ);
+	    MPU6050_GetData(&AX, &AY, &AZ, &GX, &GY, &GZ);
+	    ID = MPU6050_GetID();
+	    printf("ID:%d, AX:%d, AY:%d, AZ:%d, GX:%d, GY:%d, GZ:%d", ID, AX, AY, AZ, GX, GY, GZ);
 
 //	    if (Serial_GetRxFlag() == 1)
 //	    {
