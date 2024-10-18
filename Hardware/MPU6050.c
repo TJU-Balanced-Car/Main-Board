@@ -25,7 +25,7 @@ void MPU6050_WaitEvent(uint32_t I2C_EVENT)
         Timeout --;
         if (Timeout == 0)
         {
-            printf("ERROR: I2C Waiting Timeout");
+            printf("ERROR: I2C Waiting Timeout\n");
             break;
         }
     }

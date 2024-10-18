@@ -21,26 +21,23 @@ uint8_t Serial_RxFlag;
 //==========================================================
 void Serial_Init(void)
 {
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE); // 这里开启的是APB2的时钟，只有USART1用的是这个
-                                                           // 其他USART串口需要另外使能APB1时钟
-    //RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE); // 使能GPIOA的时钟
-    //RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOD, ENABLE); // 使能GPIOA的时钟
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE); // 使能AFIO时钟，以使用重映射
-    GPIO_PinRemapConfig(GPIO_Remap_USART1, ENABLE); // 开启重映射
+    GPIO_PinRemapConfig(GPIO_Remap_USART2, ENABLE); // 开启重映射
 
     GPIO_InitTypeDef GPIO_InitStructure;
-    // USART1_TX
+    // USART2_TX
     GPIO_StructInit(&GPIO_InitStructure); // 复用推挽输出，配置TX输出使用
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOD, &GPIO_InitStructure);
+    // USART2_RX
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU; // 上拉输出，配置RX接收使用
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIOA, &GPIO_InitStructure);
-    // USART1_RX
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU; // 上拉输出，配置RX接收使用
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIOA, &GPIO_InitStructure);
+    GPIO_Init(GPIOD, &GPIO_InitStructure);
 
     USART_InitTypeDef USART_InitStructure;
     USART_StructInit(&USART_InitStructure);
@@ -50,61 +47,61 @@ void Serial_Init(void)
     USART_InitStructure.USART_Parity = USART_Parity_No; // 无校验位
     USART_InitStructure.USART_StopBits = USART_StopBits_1; // 停止位
     USART_InitStructure.USART_WordLength = USART_WordLength_8b; // 字长
-    USART_Init(USART1, &USART_InitStructure);
+    USART_Init(USART2, &USART_InitStructure);
 
     // 开启中断
-    USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
+    USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
     NVIC_InitTypeDef NVIC_InitStructure;
-    NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
     NVIC_Init(&NVIC_InitStructure);
 
-    USART_Cmd(USART1, ENABLE);
+    USART_Cmd(USART2, ENABLE);
 }
 
 //==========================================================
-//  函数名称：   USART1_SendByte
-//  函数功能：   使用USART1发送字节
+//  函数名称：   USART2_SendByte
+//  函数功能：   使用USART2发送字节
 //  入口参数：   单字节的信息
 //  返回参数：   无
 //==========================================================
-void USART1_SendByte(uint8_t Byte)
+void USART2_SendByte(uint8_t Byte)
 {
-    USART_SendData(USART1, Byte);
-    while (USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET); // 检测标志位防止覆写
+    USART_SendData(USART2, Byte);
+    while (USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET); // 检测标志位防止覆写
 }
 
 //==========================================================
-//  函数名称：   USART1_SendArray
-//  函数功能：   使用USART1发送数组
+//  函数名称：   USART2_SendArray
+//  函数功能：   使用USART2发送数组
 //  入口参数：   整型数组
 //  返回参数：   无
 //==========================================================
-void USART1_SendArray(uint8_t *Array)
+void USART2_SendArray(uint8_t *Array)
 {
     uint16_t i, Length;
     Length = sizeof(Array) / sizeof(Array[0]);
     for (i = 0; i < Length; i++)
     {
-        USART1_SendByte(Array[i]);
+        USART2_SendByte(Array[i]);
     }
 }
 
 //==========================================================
-//  函数名称：   USART1_SendString
-//  函数功能：   使用USART1发送字符串
+//  函数名称：   USART2_SendString
+//  函数功能：   使用USART2发送字符串
 //  入口参数：   字符串
 //  返回参数：   无
 //==========================================================
-void USART1_SendString(char *String)
+void USART2_SendString(char *String)
 {
     uint8_t i;
     for (i = 0; String[i] != '\0'; i ++)
     {
-        USART1_SendByte(String[i]);
+        USART2_SendByte(String[i]);
     }
 }
 
@@ -122,12 +119,12 @@ uint32_t Pow(uint32_t X, uint32_t Y)
 }
 
 //==========================================================
-//  函数名称：   USART1_SendNumber
-//  函数功能：   使用USART1发送一串数字
+//  函数名称：   USART2_SendNumber
+//  函数功能：   使用USART2发送一串数字
 //  入口参数：   整型数字
 //  返回参数：   无
 //==========================================================
-void USART1_SendNumber(uint32_t Number)
+void USART2_SendNumber(uint32_t Number)
 {
     uint8_t i, Length = 0;
     uint32_t tmp = Number;
@@ -138,39 +135,39 @@ void USART1_SendNumber(uint32_t Number)
     }
     for (i = 0; i < Length; i++)
     {
-        USART1_SendByte(Number / Pow(10, Length - i - 1) % 10 + '0');
+        USART2_SendByte(Number / Pow(10, Length - i - 1) % 10 + '0');
     }
 }
 
 /****************************************************************************/
 //==========================================================
 //  函数名称：   fputc
-//  函数功能：   重定向printf函数**至USART1串口**
+//  函数功能：   重定向printf函数**至USART2串口**
 //  入口参数：   要输出的字符，文件指针
 //  返回参数：   输出的字符
 //==========================================================
 int fputc(int ch, FILE *f)
 {
-    USART1_SendByte(ch);
+    USART2_SendByte(ch);
     return ch;
 }
 /****************************************************************************/
 
 /******************************************************************************
 //==========================================================
-//  函数名称：   USART1_Printf
-//  函数功能：   重定向printf函数**至USART1串口**
+//  函数名称：   USART2_Printf
+//  函数功能：   重定向printf函数**至USART2串口**
 //  入口参数：   要输出的字符串，要求长度小于500
 //  返回参数：   无
 //==========================================================
-void USART1_Printf(char *format, ...)
+void USART2_Printf(char *format, ...)
 {
     char String[501];
     va_list arg;
     va_start(arg, format);
     vsprintf(String, format, arg);
     va_end(arg);
-    USART1_SendString(String);
+    USART2_SendString(String);
 }
 *******************************************************************************/
 
@@ -191,31 +188,31 @@ uint8_t Serial_GetRxFlag(void)
 }
 
 //==========================================================
-//  函数名称：   USART1_SendPacket
-//  函数功能：   通过USART1发送数据包
+//  函数名称：   USART2_SendPacket
+//  函数功能：   通过USART2发送数据包
 //  入口参数：   无
 //  返回参数：   无
 //==========================================================
-void USART1_SendPacket(void)
+void USART2_SendPacket(void)
 {
-    USART1_SendByte(0xFF);
-    USART1_SendArray(Serial_TxPacket);
-    USART1_SendByte(0xFE);
+    USART2_SendByte(0xFF);
+    USART2_SendArray(Serial_TxPacket);
+    USART2_SendByte(0xFE);
 }
 
 //==========================================================
-//  函数名称：   USART1_IRQHandler
+//  函数名称：   USART2_IRQHandler
 //  函数功能：   串口中断服务函数
 //  入口参数：   无
 //  返回参数：   无
 //==========================================================
-void USART1_IRQHandler(void)
+void USART2_IRQHandler(void)
 {
     static uint8_t RxState = 0;
     static uint8_t pRxPacket = 0;
-    if (USART_GetFlagStatus(USART1, USART_IT_RXNE) == SET)
+    if (USART_GetFlagStatus(USART2, USART_IT_RXNE) == SET)
     {
-        uint8_t RxData = USART_ReceiveData(USART1);
+        uint8_t RxData = USART_ReceiveData(USART2);
 
         if (RxState == 0)
         {
@@ -241,6 +238,6 @@ void USART1_IRQHandler(void)
             }
         }
 
-        USART_ClearITPendingBit(USART1, USART_IT_RXNE);
+        USART_ClearITPendingBit(USART2, USART_IT_RXNE);
     }
 }
