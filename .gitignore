@@ -8,7 +8,6 @@
 
 # 不忽略Hardware文件夹及其所有内容
 !Hardware/*
-!System/*
 
 # !.git/*
 !.gitignore

@@ -1,105 +1,109 @@
 /*
  * Motor.c
  *
- *  Created on: 2024Äê10ÔÂ11ÈÕ
+ *  Created on: 2024å¹´10æœˆ11æ—¥
  *      Author: mdfucker
  */
 
 #include "debug.h"
 
 //==========================================================
-//  º¯ÊıÃû³Æ£º   Motor_PWM_Init
-//  º¯Êı¹¦ÄÜ£º   ³õÊ¼»¯Á½¸öµç»ú
-//  Èë¿Ú²ÎÊı£º   ÎŞ
-//  ·µ»Ø²ÎÊı£º   ÎŞ
+//  å‡½æ•°åç§°ï¼š   Motor_PWM_Init
+//  å‡½æ•°åŠŸèƒ½ï¼š   åˆå§‹åŒ–ä¸¤ä¸ªç”µæœº
+//  å…¥å£å‚æ•°ï¼š   æ— 
+//  è¿”å›å‚æ•°ï¼š   æ— 
 //==========================================================
-void Motor_PWM_Init(void)
+void Motor_Init(void)
 {
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM8, ENABLE); // ¿ªÆôAPB2ÍâÉèÊ±ÖÓ
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM8, ENABLE); // å¼€å¯APB2å¤–è®¾æ—¶é’Ÿ
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
 
-    GPIO_InitTypeDef GPIO_InitStructure; // GPIO³õÊ¼»¯½á¹¹Ìå
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP; // Òı½ÅÔËĞĞÄ£Ê½
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_8; // Ö¸¶¨Òı½Å
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; // Òı½ÅËÙ¶È
-    GPIO_Init(GPIOC, &GPIO_InitStructure); // GPIO³õÊ¼»¯
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP; // Òı½ÅÔËĞĞÄ£Ê½
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7 | GPIO_Pin_9; // Ö¸¶¨Òı½Å
-    GPIO_Init(GPIOC, &GPIO_InitStructure); // GPIO³õÊ¼»¯
+    GPIO_InitTypeDef GPIO_InitStructure; // GPIOåˆå§‹åŒ–ç»“æ„ä½“
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP; // å¼•è„šè¿è¡Œæ¨¡å¼
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_8; // æŒ‡å®šå¼•è„š
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; // å¼•è„šé€Ÿåº¦
+    GPIO_Init(GPIOC, &GPIO_InitStructure); // GPIOåˆå§‹åŒ–
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP; // å¼•è„šè¿è¡Œæ¨¡å¼
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7 | GPIO_Pin_9; // æŒ‡å®šå¼•è„š
+    GPIO_Init(GPIOC, &GPIO_InitStructure); // GPIOåˆå§‹åŒ–
 
-    TIM_InternalClockConfig(TIM8); // Ñ¡ÔñÄÚ²¿Ê±ÖÓ
+    TIM_InternalClockConfig(TIM8); // é€‰æ‹©å†…éƒ¨æ—¶é’Ÿ
 
-    TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure; // TimeBaseInit½á¹¹Ìå
-    TIM_TimeBaseInitStructure.TIM_ClockDivision = TIM_CKD_DIV1; // ÂË²¨Æ÷²ÉÑùÆµÂÊ·ÖÆµ
-    TIM_TimeBaseInitStructure.TIM_CounterMode = TIM_CounterMode_Up; // ¼ÆÊıÄ£Ê½
-    TIM_TimeBaseInitStructure.TIM_Period = 200 - 1; // ÖÜÆÚ£¬ARR×Ô¶¯ÖØ×°Æ÷
-    TIM_TimeBaseInitStructure.TIM_Prescaler = 14400 - 1; // PSCÔ¤·ÖÆµÆ÷
-    TIM_TimeBaseInitStructure.TIM_RepetitionCounter = 0; // ÖØ¸´¼ÆÊıÆ÷
-    TIM_TimeBaseInit(TIM8, &TIM_TimeBaseInitStructure); // Ê±»ùµ¥Ôª³õÊ¼»¯
+    TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure; // TimeBaseInitç»“æ„ä½“
+    TIM_TimeBaseInitStructure.TIM_ClockDivision = TIM_CKD_DIV1; // æ»¤æ³¢å™¨é‡‡æ ·é¢‘ç‡åˆ†é¢‘
+    TIM_TimeBaseInitStructure.TIM_CounterMode = TIM_CounterMode_Up; // è®¡æ•°æ¨¡å¼
+    TIM_TimeBaseInitStructure.TIM_Period = 100 - 1; // å‘¨æœŸï¼ŒARRè‡ªåŠ¨é‡è£…å™¨
+    TIM_TimeBaseInitStructure.TIM_Prescaler = 72 - 1; // PSCé¢„åˆ†é¢‘å™¨
+    TIM_TimeBaseInitStructure.TIM_RepetitionCounter = 0; // é‡å¤è®¡æ•°å™¨
+    TIM_TimeBaseInit(TIM8, &TIM_TimeBaseInitStructure); // æ—¶åŸºå•å…ƒåˆå§‹åŒ–
 
-    TIM_OCInitTypeDef TIM_OCInitStructure; // ½á¹¹Ìå
-    TIM_OCStructInit(&TIM_OCInitStructure); // ÏÈ¸ø½á¹¹Ìå¸³³õÊ¼Öµ£¬·ÀÖ¹³öÎÊÌâ
-    TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1; // Êä³ö±È½ÏÄ£Ê½
-    TIM_OCInitStructure.TIM_OCPolarity = TIM_OCNPolarity_High; // Êä³ö±È½Ï¼«ĞÔ
-    TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Disable; // Êä³ö±È½ÏÊ¹ÄÜ
-    TIM_OCInitStructure.TIM_Pulse = 0; // ÉèÖÃCCR
-                                        // **¹ØÓÚARR£¬PSC£¬CCRµÄ¼ÆËã**
-                                        // PWMÆµÂÊ£ºFreq = CK_PSC / (PSC + 1) / (ARR + 1)
-                                        // *PWMÕ¼¿Õ±È£ºDuty = CCR / (ARR + 1)
-                                        // PWM·Ö±æÂÊ£ºReso = 1 / (ARR + 1)
-    TIM_OC1Init(TIM8, &TIM_OCInitStructure); // Í¨µÀ³õÊ¼»¯
+    TIM_OCInitTypeDef TIM_OCInitStructure; // ç»“æ„ä½“
+    TIM_OCStructInit(&TIM_OCInitStructure); // å…ˆç»™ç»“æ„ä½“èµ‹åˆå§‹å€¼ï¼Œé˜²æ­¢å‡ºé—®é¢˜
+    TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1; // è¾“å‡ºæ¯”è¾ƒæ¨¡å¼
+    TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High; // è¾“å‡ºæ¯”è¾ƒææ€§
+    TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable; // è¾“å‡ºæ¯”è¾ƒä½¿èƒ½
+    TIM_OCInitStructure.TIM_Pulse = 0; // è®¾ç½®CCR
+                                        // **å…³äºARRï¼ŒPSCï¼ŒCCRçš„è®¡ç®—**
+                                        // PWMé¢‘ç‡ï¼šFreq = CK_PSC / (PSC + 1) / (ARR + 1)
+                                        // *PWMå ç©ºæ¯”ï¼šDuty = CCR / (ARR + 1)
+                                        // PWMåˆ†è¾¨ç‡ï¼šReso = 1 / (ARR + 1)
+    TIM_OC1Init(TIM8, &TIM_OCInitStructure); // é€šé“åˆå§‹åŒ–
     TIM_OC3Init(TIM8, &TIM_OCInitStructure);
 
-    TIM_Cmd(TIM8, ENABLE); // Æô¶¯¶¨Ê±Æ÷
+    TIM_OC1PreloadConfig(TIM8, ENABLE);
+    TIM_OC3PreloadConfig(TIM8, ENABLE);
+
+    TIM_Cmd(TIM8, ENABLE); // å¯åŠ¨å®šæ—¶å™¨
 
 }
 
 //==========================================================
-//  º¯ÊıÃû³Æ£º   Motor1_SetSpeed
-//  º¯Êı¹¦ÄÜ£º   ÉèÖÃµç»ú1×ªËÙ
-//  Èë¿Ú²ÎÊı£º   µç»ú×ªËÙ£¬È¡Öµ0~100
-//  ·µ»Ø²ÎÊı£º   ÎŞ
+//  å‡½æ•°åç§°ï¼š   Motor1_SetSpeed
+//  å‡½æ•°åŠŸèƒ½ï¼š   è®¾ç½®ç”µæœº1è½¬é€Ÿ
+//  å…¥å£å‚æ•°ï¼š   ç”µæœºè½¬é€Ÿï¼Œå–å€¼0~100
+//  è¿”å›å‚æ•°ï¼š   æ— 
 //==========================================================
 void Motor1_SetSpeed(float Speed)
 {
-    TIM_SetCompare3(TIM8, Speed * 2 / 10); // µç»ú×ªËÙÎª0~100
+    TIM_SetCompare3(TIM8, Speed * (100 / 100)); // ä¿æŒåœ¨0åˆ°100èŒƒå›´å†…
 }
 
 //==========================================================
-//  º¯ÊıÃû³Æ£º   Motor1_SetDir
-//  º¯Êı¹¦ÄÜ£º   ÉèÖÃµç»ú1×ªÏò
-//  Èë¿Ú²ÎÊı£º   ×ª¶¯·½Ïò£¬ÕıÏòÎª1£¬·´ÏòÎª0
-//  ·µ»Ø²ÎÊı£º   ÎŞ
+//  å‡½æ•°åç§°ï¼š   Motor1_SetDir
+//  å‡½æ•°åŠŸèƒ½ï¼š   è®¾ç½®ç”µæœº1è½¬å‘
+//  å…¥å£å‚æ•°ï¼š   è½¬åŠ¨æ–¹å‘ï¼Œæ­£å‘ä¸º1ï¼Œåå‘ä¸º0
+//  è¿”å›å‚æ•°ï¼š   æ— 
 //==========================================================
 void Motor1_SetDir(uint8_t Dir)
 {
     BitAction Bit;
+    Bit = Bit_SET;
     if (Dir == 1) Bit = Bit_SET;
     else if (Dir == 0) Bit = Bit_RESET;
     GPIO_WriteBit(GPIOC, GPIO_Pin_9, Bit);
 }
 
 //==========================================================
-//  º¯ÊıÃû³Æ£º   Motor2_SetSpeed
-//  º¯Êı¹¦ÄÜ£º   ÉèÖÃµç»ú2×ªËÙ
-//  Èë¿Ú²ÎÊı£º   µç»ú×ªËÙ£¬È¡Öµ0~100
-//  ·µ»Ø²ÎÊı£º   ÎŞ
+//  å‡½æ•°åç§°ï¼š   Motor2_SetSpeed
+//  å‡½æ•°åŠŸèƒ½ï¼š   è®¾ç½®ç”µæœº2è½¬é€Ÿ
+//  å…¥å£å‚æ•°ï¼š   ç”µæœºè½¬é€Ÿï¼Œå–å€¼0~100
+//  è¿”å›å‚æ•°ï¼š   æ— 
 //==========================================================
 void Motor2_SetSpeed(float Speed)
 {
-    TIM_SetCompare1(TIM8, Speed * 2 / 10); // µç»ú×ªËÙÎª0~100
+    TIM_SetCompare1(TIM8, Speed / 5); // ç”µæœºè½¬é€Ÿä¸º0~100
 }
 
 //==========================================================
-//  º¯ÊıÃû³Æ£º   Motor2_SetDir
-//  º¯Êı¹¦ÄÜ£º   ÉèÖÃµç»ú2×ªÏò
-//  Èë¿Ú²ÎÊı£º   ×ª¶¯·½Ïò£¬ÕıÏòÎª1£¬·´ÏòÎª0
-//  ·µ»Ø²ÎÊı£º   ÎŞ
+//  å‡½æ•°åç§°ï¼š   Motor2_SetDir
+//  å‡½æ•°åŠŸèƒ½ï¼š   è®¾ç½®ç”µæœº2è½¬å‘
+//  å…¥å£å‚æ•°ï¼š   è½¬åŠ¨æ–¹å‘ï¼Œæ­£å‘ä¸º1ï¼Œåå‘ä¸º0
+//  è¿”å›å‚æ•°ï¼š   æ— 
 //==========================================================
 void Motor2_SetDir(uint8_t Dir)
 {
     BitAction Bit;
     if (Dir == 1) Bit = Bit_SET;
-    else if (Dir == 0) Bit = Bit_RESET;
+    else Bit = Bit_RESET;
     GPIO_WriteBit(GPIOC, GPIO_Pin_7, Bit);
 }

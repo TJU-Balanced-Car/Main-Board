@@ -18,13 +18,14 @@
 
 */
 
-#include "debug.h"
+#include <debug.h>
 #include "Servo.h"
-#include "Buzzer.h"
-#include "Serial.h"
-#include "MPU6050.h"
+//#include "Buzzer.h"
+//#include "Serial.h"
+//#include "MPU6050.h"
 #include "TestLED.h"
-#include "Encoder.h"
+//#include "Encoder.h"
+#include "Motor.h"
 
 
 /* Global typedef */
@@ -45,14 +46,15 @@ int16_t AX, AY, AZ, GX, GY, GZ;
  */
 int main(void)
 {
-    //  Servo_PWM_Init();
-    //  Servo_SetAngle(90);
-      Buzzer_Init();
-      Buzzer_Stop();
+      Servo_PWM_Init();
+
+    //  Buzzer_Init();
+    //  Buzzer_Stop();
       Test_LED_Init();
 //        Serial_Init();
 //      Encoder_Init();
     //  MPU6050_Init();
+    Motor_Init();
 
 	SystemCoreClockUpdate();
 	Delay_Init();
@@ -60,13 +62,30 @@ int main(void)
 	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
 	printf("Run Successfully!\r\n");
 
-//	Test_LED_On();
+
+	Motor1_SetSpeed(10);
+    Motor1_SetDir(1);
+    Motor2_SetSpeed(10);
+    Motor2_SetDir(1);
+
+    Servo_SetAngle(90);
 
 	while(1)
     {
+
+//        Motor1_SetSpeed(70);
+//        Motor1_SetDir(1);
+//        Delay_Ms(1000);
+//        USART_SendData(USART2, '1');
 //	    USART1_SendString("1");
-	    Test_LED_On();
-//	    Delay_Ms(1000);
+//	    Motor1_SetDir(1);
+//	    Test_LED_Off();
+//	    Delay_Ms(10);
+//	    Motor1_SetDir(0);
+//	    Test_LED_On();
+//	    Delay_Ms(10);
+//        Motor2_SetSpeed(70);
+//        Motor2_SetDir(1);
 	    //Test_LED_Off();
 //	    MPU6050_GetData(&AX, &AY, &AZ, &GX, &GY, &GZ);
 //	    ID = MPU6050_GetID();
