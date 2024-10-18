@@ -11,14 +11,60 @@ volatile uint32_t TIM1_capture_value_1 = 0;
 volatile uint32_t TIM1_capture_value_2 = 0;
 volatile uint32_t TIM1_capture_diff = 0;
 volatile uint32_t TIM1_pwm_frequency = 0;
-extern volatile uint32_t TIM1_rpm = 0;
-extern volatile uint8_t TIM1_direction = 0;
+volatile uint32_t TIM1_tmp_rpm = 0;
+volatile uint32_t TIM1_rpm = 0;
+volatile uint8_t TIM1_direction = 0;
 volatile uint32_t TIM2_capture_value_1 = 0;
 volatile uint32_t TIM2_capture_value_2 = 0;
 volatile uint32_t TIM2_capture_diff = 0;
 volatile uint32_t TIM2_pwm_frequency = 0;
-extern volatile uint32_t TIM2_rpm = 0;
-extern volatile uint8_t TIM2_direction = 0;
+volatile uint32_t TIM2_tmp_rpm = 0;
+volatile uint32_t TIM2_rpm = 0;
+volatile uint8_t TIM2_direction = 0;
+
+//==========================================================
+//  函数名称：   Encoder1_Get_Rpm
+//  函数功能：   获取电机1的转速
+//  入口参数：   无
+//  返回参数：   电机1的转速
+//==========================================================
+uint32_t Encoder1_Get_Rpm(void)
+{
+    return TIM1_rpm;
+}
+
+//==========================================================
+//  函数名称：   Encoder1_Get_Dir
+//  函数功能：   获取电机1的转向
+//  入口参数：   无
+//  返回参数：   电机1的转向
+//==========================================================
+uint32_t Encoder1_Get_Dir(void)
+{
+    return TIM1_direction;
+}
+
+//==========================================================
+//  函数名称：   Encoder2_Get_Rpm
+//  函数功能：   获取电机2的转速
+//  入口参数：   无
+//  返回参数：   电机1的转速
+//==========================================================
+uint32_t Encoder2_Get_Rpm(void)
+{
+    return TIM2_rpm;
+}
+
+//==========================================================
+//  函数名称：   Encoder2_Get_Dir
+//  函数功能：   获取电机2的转向
+//  入口参数：   无
+//  返回参数：   电机2的转向
+//==========================================================
+uint32_t Encoder2_Get_Dir(void)
+{
+    return TIM2_direction;
+}
 
 //==========================================================
 //  函数名称：   TIM1_IRQHandler
@@ -67,7 +113,7 @@ void TIM1_IRQHandler(void)
 
 
             // 将频率转换为转速 (RPM = 频率 * 60 / 脉冲数)
-            TIM1_rpm = (TIM1_pwm_frequency * 60) / 6; // 脉冲数存疑，三相电机是6？
+            TIM1_tmp_rpm = (TIM1_pwm_frequency * 60) / 6; // 脉冲数存疑，三相电机是6？
 
             // 读取方向引脚电平
             TIM1_direction = GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_11);
@@ -75,7 +121,7 @@ void TIM1_IRQHandler(void)
             // 根据方向调整RPM的符号：1 为正转，0 为反转
             if (TIM1_direction == 0)
             {
-                TIM1_rpm = -TIM1_rpm;  // 如果反向，转速为负值
+                TIM1_rpm = -TIM1_tmp_rpm;  // 如果反向，转速为负值
             }
 
             // 重置捕获值
@@ -128,7 +174,7 @@ void TIM2_IRQHandler(void)
 
 
             // 将频率转换为转速 (RPM = 频率 * 60 / 脉冲数)
-            TIM2_rpm = (TIM2_pwm_frequency * 60) / 6; // 脉冲数存疑，三相电机是6？
+            TIM2_tmp_rpm = (TIM2_pwm_frequency * 60) / 6; // 脉冲数存疑，三相电机是6？
 
             // 读取方向引脚电平
             TIM2_direction = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_1);
@@ -136,7 +182,7 @@ void TIM2_IRQHandler(void)
             // 根据方向调整RPM的符号：1 为正转，0 为反转
             if (TIM2_direction == 0)
             {
-                TIM2_rpm = -TIM2_rpm;  // 如果反向，转速为负值
+                TIM2_rpm = -TIM2_tmp_rpm;  // 如果反向，转速为负值
             }
 
             // 重置捕获值
