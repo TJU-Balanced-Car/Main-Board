@@ -63,9 +63,9 @@ int main(void)
 	printf("Run Successfully!\r\n");
 
 
-	Motor1_SetSpeed(10);
+	Motor1_SetSpeed(90);
     Motor1_SetDir(1);
-    Motor2_SetSpeed(10);
+    Motor2_SetSpeed(30);
     Motor2_SetDir(1);
 
     Servo_SetAngle(90);

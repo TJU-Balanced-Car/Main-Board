@@ -8,14 +8,14 @@
 #include "debug.h"
 
 //==========================================================
-//  函数名称：   Motor_PWM_Init
+//  函数名称：   Motor_Init
 //  函数功能：   初始化两个电机
 //  入口参数：   无
 //  返回参数：   无
 //==========================================================
 void Motor_Init(void)
 {
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM8, ENABLE); // 开启APB2外设时钟
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE); // 开启APB2外设时钟
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
 
     GPIO_InitTypeDef GPIO_InitStructure; // GPIO初始化结构体
@@ -27,7 +27,11 @@ void Motor_Init(void)
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7 | GPIO_Pin_9; // 指定引脚
     GPIO_Init(GPIOC, &GPIO_InitStructure); // GPIO初始化
 
-    TIM_InternalClockConfig(TIM8); // 选择内部时钟
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
+    GPIO_PinRemapConfig(GPIO_FullRemap_TIM3, ENABLE);
+//    GPIO_PinRemapConfig(GPIO_PartialRemap_TIM3, ENABLE);  // 部分重映射无法输出PWM波形
+
+    TIM_InternalClockConfig(TIM3); // 选择内部时钟
 
     TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure; // TimeBaseInit结构体
     TIM_TimeBaseInitStructure.TIM_ClockDivision = TIM_CKD_DIV1; // 滤波器采样频率分频
@@ -35,7 +39,7 @@ void Motor_Init(void)
     TIM_TimeBaseInitStructure.TIM_Period = 100 - 1; // 周期，ARR自动重装器
     TIM_TimeBaseInitStructure.TIM_Prescaler = 72 - 1; // PSC预分频器
     TIM_TimeBaseInitStructure.TIM_RepetitionCounter = 0; // 重复计数器
-    TIM_TimeBaseInit(TIM8, &TIM_TimeBaseInitStructure); // 时基单元初始化
+    TIM_TimeBaseInit(TIM3, &TIM_TimeBaseInitStructure); // 时基单元初始化
 
     TIM_OCInitTypeDef TIM_OCInitStructure; // 结构体
     TIM_OCStructInit(&TIM_OCInitStructure); // 先给结构体赋初始值，防止出问题
@@ -47,13 +51,13 @@ void Motor_Init(void)
                                         // PWM频率：Freq = CK_PSC / (PSC + 1) / (ARR + 1)
                                         // *PWM占空比：Duty = CCR / (ARR + 1)
                                         // PWM分辨率：Reso = 1 / (ARR + 1)
-    TIM_OC1Init(TIM8, &TIM_OCInitStructure); // 通道初始化
-    TIM_OC3Init(TIM8, &TIM_OCInitStructure);
+    TIM_OC1Init(TIM3, &TIM_OCInitStructure); // 通道初始化
+    TIM_OC3Init(TIM3, &TIM_OCInitStructure);
 
-    TIM_OC1PreloadConfig(TIM8, ENABLE);
-    TIM_OC3PreloadConfig(TIM8, ENABLE);
+    TIM_OC1PreloadConfig(TIM3, ENABLE);
+    TIM_OC3PreloadConfig(TIM3, ENABLE);
 
-    TIM_Cmd(TIM8, ENABLE); // 启动定时器
+    TIM_Cmd(TIM3, ENABLE); // 启动定时器
 
 }
 
@@ -65,7 +69,7 @@ void Motor_Init(void)
 //==========================================================
 void Motor1_SetSpeed(float Speed)
 {
-    TIM_SetCompare3(TIM8, Speed * (100 / 100)); // 保持在0到100范围内
+    TIM_SetCompare3(TIM3, Speed / 2); // 保持在0到100范围内
 }
 
 //==========================================================
@@ -91,7 +95,7 @@ void Motor1_SetDir(uint8_t Dir)
 //==========================================================
 void Motor2_SetSpeed(float Speed)
 {
-    TIM_SetCompare1(TIM8, Speed / 5); // 电机转速为0~100
+    TIM_SetCompare1(TIM3, Speed / 2); // 电机转速为0~100
 }
 
 //==========================================================
