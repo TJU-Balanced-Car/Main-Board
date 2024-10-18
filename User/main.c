@@ -75,7 +75,7 @@ int main(void)
 
 //        Motor1_SetSpeed(70);
 //        Motor1_SetDir(1);
-        Delay_Ms(5000);
+        Delay_Ms(1000);
 //        USART_SendData(/USART2, '1');
 //	    USART2_SendString("dsahgbksfjvk");
 //	    Motor1_SetDir(1);
@@ -89,7 +89,7 @@ int main(void)
 	    //Test_LED_Off();
 	    MPU6050_GetData(&AX, &AY, &AZ, &GX, &GY, &GZ);
 	    ID = MPU6050_GetID();
-	    printf("ID:%d, AX:%d, AY:%d, AZ:%d, GX:%d, GY:%d, GZ:%d", ID, AX, AY, AZ, GX, GY, GZ);
+	    printf("ID:%d, AX:%d, AY:%d, AZ:%d, GX:%d, GY:%d, GZ:%d\n", ID, AX, AY, AZ, GX, GY, GZ);
 
 //	    if (Serial_GetRxFlag() == 1)
 //	    {
