@@ -75,10 +75,10 @@ int main(void)
 	while(1)
     {
 
-	    printf("hightime1: %d, dir1: %d, hightime2: %d, dir2: %d\n", Encoder1_Get_HighTime(), Encoder1_Get_Dir(), Encoder2_Get_HighTime(), Encoder2_Get_Dir());
+	    printf("duty1: %d, dir1: %d, duty2: %d, dir2: %d, c1: %d, c2: %d\n", PWMI1_GetDuty(), 0, PWMI2_GetDuty(), 0, P1_C1(), P1_C2());
 //        Motor1_SetSpeed(70);
 //        Motor1_SetDir(1);
-        Delay_Ms(1000);
+        Delay_Ms(500);
 //        USART_SendData(USART2, '1');
 //	    USART2_SendString("dsahgbksfjvk");
 //	    Motor1_SetDir(1);

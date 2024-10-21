@@ -8,10 +8,10 @@
 #ifndef HARDWARE_ENCODER_H_
 #define HARDWARE_ENCODER_H_
 
-uint32_t Encoder1_Get_HighTime(void);
-uint8_t Encoder1_Get_Dir(void);
-uint32_t Encoder2_Get_HighTime(void);
-uint8_t Encoder2_Get_Dir(void);
 void Encoder_Init(void);
+uint32_t PWMI1_GetDuty(void);
+uint32_t PWMI1_GetDuty(void);
+uint32_t P1_C1(void);
+uint32_t P1_C2(void);
 
 #endif /* HARDWARE_ENCODER_H_ */
