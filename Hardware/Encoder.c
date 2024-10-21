@@ -50,8 +50,8 @@ void Encoder_Init(void)
     TIM_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI; // 选择直连通道
     TIM_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1; // 不分频
     TIM_ICInitStructure.TIM_ICFilter = 0; // 因为来源是PWM波所以滤波器最小，江科协用的旋转编码器设置为最大
-    TIM_PWMIConfig(TIM1, &TIM_ICInitStructure); // 使用PWMI模式测频率和占空比
-    TIM_PWMIConfig(TIM2, &TIM_ICInitStructure);
+    TIM_ICInit(TIM1, &TIM_ICInitStructure);
+    TIM_ICInit(TIM2, &TIM_ICInitStructure);
 
     TIM_SelectInputTrigger(TIM1, TIM_TS_TI2FP2);        // 选择从模式触发源为TI1FP1
     TIM_SelectInputTrigger(TIM2, TIM_TS_TI2FP2);        // 选择从模式触发源为TI1FP1
@@ -64,26 +64,45 @@ void Encoder_Init(void)
 }
 
 //==========================================================
-//  函数名称：   PWMI1_GetDuty
-//  函数功能：   获取电机1的占空比
+//  函数名称：   Motor1_GetDir
+//  函数功能：   获取电机1的方向
 //  入口参数：   无
-//  返回参数：   电机1的占空比
+//  返回参数：   电机1的方向，正转为0，反转为-1
 //==========================================================
-uint32_t PWMI1_GetDuty(void)
+uint32_t Motor1_GetDir(void)
 {
-    return (100 * TIM_GetCapture2(TIM1) / TIM_GetCapture1(TIM1));
+    return GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_9);
 }
 
-uint32_t P1_C1(void) {return TIM_GetCapture1(TIM1);}
-uint32_t P1_C2(void) {return TIM_GetCapture2(TIM1);}
+//==========================================================
+//  函数名称：   Motor2_GetDir
+//  函数功能：   获取电机2的方向
+//  入口参数：   无
+//  返回参数：   电机2的方向，正转为0，反转为-1
+//==========================================================
+uint32_t Motor2_GetDir(void)
+{
+    return GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0);
+}
 
 //==========================================================
-//  函数名称：   PWMI2_GetDuty
-//  函数功能：   获取电机2的占空比
+//  函数名称：   Motor1_GetFreq
+//  函数功能：   获取电机1的频率
 //  入口参数：   无
-//  返回参数：   电机2的占空比
+//  返回参数：   电机1的频率，正转为正，反转为负
 //==========================================================
-uint32_t PWMI2_GetDuty(void)
+int32_t Motor1_GetFreq(void)
 {
-    return (100 * TIM_GetCapture2(TIM2) / TIM_GetCapture1(TIM2));
+    return (Motor1_GetDir() == 1) ? 1000000 / TIM_GetCapture2(TIM1): (-1) * 1000000 / TIM_GetCapture2(TIM1);
+}
+
+//==========================================================
+//  函数名称：   Motor2_GetFreq
+//  函数功能：   获取电机2的频率
+//  入口参数：   无
+//  返回参数：   电机2的频率，正转为正，反转为负
+//==========================================================
+int32_t Motor2_GetFreq(void)
+{
+    return (Motor2_GetDir() == 1) ? 1000000 / TIM_GetCapture2(TIM2) : (-1) * 1000000 / TIM_GetCapture2(TIM2);
 }
