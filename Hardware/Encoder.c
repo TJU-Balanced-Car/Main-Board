@@ -7,30 +7,37 @@
 
 #include "debug.h"
 
-volatile uint32_t TIM1_capture_value_1 = 0;
-volatile uint32_t TIM1_capture_value_2 = 0;
-volatile uint32_t TIM1_capture_diff = 0;
-volatile uint32_t TIM1_pwm_frequency = 0;
-volatile uint32_t TIM1_tmp_rpm = 0;
-volatile uint32_t TIM1_rpm = 0;
-volatile uint8_t TIM1_direction = 0;
-volatile uint32_t TIM2_capture_value_1 = 0;
-volatile uint32_t TIM2_capture_value_2 = 0;
-volatile uint32_t TIM2_capture_diff = 0;
-volatile uint32_t TIM2_pwm_frequency = 0;
-volatile uint32_t TIM2_tmp_rpm = 0;
-volatile uint32_t TIM2_rpm = 0;
-volatile uint8_t TIM2_direction = 0;
+//volatile uint32_t TIM1_capture_value_1 = 0;
+//volatile uint32_t TIM1_capture_value_2 = 0;
+//volatile uint32_t TIM1_capture_diff = 0;
+//volatile uint32_t TIM1_pwm_frequency = 0;
+//volatile uint32_t TIM1_tmp_rpm = 0;
+//volatile uint32_t TIM1_rpm = 0;
+volatile uint32_t riseTime1 = 0;
+volatile uint32_t lastCapture1 = 0;
+volatile uint32_t Encoder1_HighTime = 0;
+volatile uint8_t Encoder1_Direction = 0;
+//volatile uint32_t TIM2_capture_value_1 = 0;
+//volatile uint32_t TIM2_capture_value_2 = 0;
+//volatile uint32_t TIM2_capture_diff = 0;
+//volatile uint32_t TIM2_pwm_frequency = 0;
+//volatile uint32_t TIM2_tmp_rpm = 0;
+//volatile uint32_t TIM2_rpm = 0;
+volatile uint32_t riseTime2 = 0;
+volatile uint32_t lastCapture2 = 0;
+volatile uint32_t Encoder2_HighTime = 0;
+volatile uint8_t Encoder2_Direction = 0;
+
 
 //==========================================================
-//  函数名称：   Encoder1_Get_Rpm
-//  函数功能：   获取电机1的转速
+//  函数名称：   Encoder1_Get_HighTime
+//  函数功能：   获取电机1的高电平时长
 //  入口参数：   无
-//  返回参数：   电机1的转速
+//  返回参数：   电机1的高电平时长
 //==========================================================
-uint32_t Encoder1_Get_Rpm(void)
+uint32_t Encoder1_Get_HighTime(void)
 {
-    return TIM1_rpm;
+    return Encoder1_HighTime;
 }
 
 //==========================================================
@@ -39,20 +46,20 @@ uint32_t Encoder1_Get_Rpm(void)
 //  入口参数：   无
 //  返回参数：   电机1的转向
 //==========================================================
-uint32_t Encoder1_Get_Dir(void)
+uint8_t Encoder1_Get_Dir(void)
 {
-    return TIM1_direction;
+    return Encoder1_Direction;
 }
 
 //==========================================================
-//  函数名称：   Encoder2_Get_Rpm
-//  函数功能：   获取电机2的转速
+//  函数名称：   Encoder2_Get_HighTime
+//  函数功能：   获取电机2的高电平时长
 //  入口参数：   无
-//  返回参数：   电机1的转速
+//  返回参数：   电机2的高电平时长
 //==========================================================
-uint32_t Encoder2_Get_Rpm(void)
+uint32_t Encoder2_Get_HighTime(void)
 {
-    return TIM2_rpm;
+    return Encoder2_HighTime;
 }
 
 //==========================================================
@@ -61,9 +68,9 @@ uint32_t Encoder2_Get_Rpm(void)
 //  入口参数：   无
 //  返回参数：   电机2的转向
 //==========================================================
-uint32_t Encoder2_Get_Dir(void)
+uint8_t Encoder2_Get_Dir(void)
 {
-    return TIM2_direction;
+    return Encoder2_Direction;
 }
 
 //==========================================================
@@ -74,61 +81,30 @@ uint32_t Encoder2_Get_Dir(void)
 //==========================================================
 void TIM1_IRQHandler(void)
 {
-    // 检查是否发生了捕获事件
-    if (TIM_GetITStatus(TIM1, TIM_IT_CC1) == SET)
+    printf("T1!\n");
+    if (TIM_GetITStatus(TIM1, TIM_IT_CC2) != RESET)
     {
-        // 清除中断标志
-        TIM_ClearITPendingBit(TIM1, TIM_IT_CC1);
-
-        // 捕获第一个上升沿
-        if (TIM1_capture_value_1 == 0)
+        printf("Run into T1IRQ\n");
+        uint32_t currentTime = TIM_GetCapture2(TIM1);
+        if (lastCapture1 == 0 || currentTime > lastCapture1)
         {
-            TIM1_capture_value_1 = TIM_GetCapture1(TIM1);
+            riseTime1 = currentTime; // 记录上升沿
         }
-        // 捕获第二个上升沿，计算周期
         else
         {
-            TIM1_capture_value_2 = TIM_GetCapture1(TIM1);
-
-            // 计算周期差
-            if (TIM1_capture_value_2 > TIM1_capture_value_1)
-            {
-                TIM1_capture_diff = TIM1_capture_value_2 - TIM1_capture_value_1;
-            }
-            else
-            {
-                // 处理定时器溢出的情况
-                TIM1_capture_diff = (0xFFFF - TIM1_capture_value_1) + TIM1_capture_value_2;
-            }
-
-            // 计算频率
-            if (TIM1_capture_diff != 0)
-            {
-                TIM1_pwm_frequency = 144000000 / TIM1_capture_diff;
-            }
-            else
-            {
-                TIM1_pwm_frequency = 0; // 或者其他合适的处理
-            }
-
-
-            // 将频率转换为转速 (RPM = 频率 * 60 / 脉冲数)
-            TIM1_tmp_rpm = (TIM1_pwm_frequency * 60) / 6; // 脉冲数存疑，三相电机是6？
-
-            // 读取方向引脚电平
-            TIM1_direction = GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_11);
-
-            // 根据方向调整RPM的符号：1 为正转，0 为反转
-            if (TIM1_direction == 0)
-            {
-                TIM1_rpm = -TIM1_tmp_rpm;  // 如果反向，转速为负值
-            }
-
-            // 重置捕获值
-            TIM1_capture_value_1 = 0;
+            // 记录下降沿时的时间
+            uint32_t fallTime1 = currentTime;
+            Encoder1_HighTime = fallTime1 - riseTime1;
         }
+        lastCapture1 = currentTime;
+
+        // 读取方向引脚电平
+        Encoder1_Direction = GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_9);
+        TIM_ClearITPendingBit(TIM1, TIM_IT_CC2);
+        printf("Run out T1IRQ\n");
     }
 }
+
 
 //==========================================================
 //  函数名称：   TIM2_IRQHandler
@@ -138,56 +114,28 @@ void TIM1_IRQHandler(void)
 //==========================================================
 void TIM2_IRQHandler(void)
 {
-    // 检查是否发生了捕获事件
-    if (TIM_GetITStatus(TIM2, TIM_IT_CC1) == SET)
+    printf("T2!\n");
+    if (TIM_GetITStatus(TIM2, TIM_IT_CC2) != RESET)
     {
-        // 清除中断标志
-        TIM_ClearITPendingBit(TIM2, TIM_IT_CC1);
-
-        // 捕获第一个上升沿
-        if (TIM2_capture_value_1 == 0)
+        printf("Run into T2IRQ\n");
+        uint32_t currentTime = TIM_GetCapture2(TIM2);
+        if (lastCapture2 == 0 || currentTime > lastCapture2)
         {
-            TIM2_capture_value_1 = TIM_GetCapture1(TIM2);
+            riseTime2 = currentTime; // 记录上升沿
         }
-        // 捕获第二个上升沿，计算周期
         else
         {
-            TIM2_capture_value_2 = TIM_GetCapture1(TIM2);
-
-            // 计算周期差
-            if (TIM2_capture_value_2 > TIM2_capture_value_1)
-            {
-                TIM2_capture_diff = TIM2_capture_value_2 - TIM2_capture_value_1;
-            }
-            else
-            {
-                // 处理定时器溢出的情况
-                TIM2_capture_diff = (0xFFFF - TIM2_capture_value_1) + TIM2_capture_value_2;
-            }
-
-            // 计算频率
-            if (TIM2_capture_diff != 0) {
-                TIM2_pwm_frequency = 144000000 / TIM2_capture_diff;
-            } else {
-                TIM2_pwm_frequency = 0; // 或者其他合适的处理
-            }
-
-
-            // 将频率转换为转速 (RPM = 频率 * 60 / 脉冲数)
-            TIM2_tmp_rpm = (TIM2_pwm_frequency * 60) / 6; // 脉冲数存疑，三相电机是6？
-
-            // 读取方向引脚电平
-            TIM2_direction = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_1);
-
-            // 根据方向调整RPM的符号：1 为正转，0 为反转
-            if (TIM2_direction == 0)
-            {
-                TIM2_rpm = -TIM2_tmp_rpm;  // 如果反向，转速为负值
-            }
-
-            // 重置捕获值
-            TIM2_capture_value_1 = 0;
+            // 记录下降沿时的时间
+            uint32_t fallTime2 = currentTime;
+            Encoder2_HighTime = fallTime2 - riseTime2;
         }
+        lastCapture2 = currentTime;
+
+        // 读取方向引脚电平
+        Encoder2_Direction = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0);
+        TIM_ClearITPendingBit(TIM2, TIM_IT_CC2);
+        TIM_SetCounter(TIM2, 0);
+        printf("Run out T2IRQ\n");
     }
 }
 
@@ -216,7 +164,8 @@ void Encoder_Init(void)
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-    // TIM_InternalClockConfig(TIM1);  似乎读PWM不需要手动设置内部时钟
+    TIM_InternalClockConfig(TIM1);  //似乎读PWM不需要手动设置内部时钟
+    TIM_InternalClockConfig(TIM2);
 
     // 定时器基本配置
     TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure;
@@ -231,7 +180,7 @@ void Encoder_Init(void)
     // 配置输入捕获
     TIM_ICInitTypeDef TIM_ICInitStructure;
     TIM_ICStructInit(&TIM_ICInitStructure);
-    TIM_ICInitStructure.TIM_Channel = TIM_Channel_1;
+    TIM_ICInitStructure.TIM_Channel = TIM_Channel_2;
     TIM_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising; // 捕获上升沿
     TIM_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI;
     TIM_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;
@@ -240,18 +189,19 @@ void Encoder_Init(void)
     TIM_ICInit(TIM2, &TIM_ICInitStructure);
 
     // 开启定时器捕获中断
-    TIM_ITConfig(TIM1, TIM_IT_CC1, ENABLE); // TIM_IT_CC1 or TIM_IT_Update
-    TIM_ITConfig(TIM2, TIM_IT_CC1, ENABLE);
+    TIM_ITConfig(TIM1, TIM_IT_CC2, ENABLE);
+    TIM_ITConfig(TIM2, TIM_IT_CC2, ENABLE);
 
     // 使能定时器
     TIM_Cmd(TIM1, ENABLE);
     TIM_Cmd(TIM2, ENABLE);
 
     // 配置定时器中断优先级
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
     NVIC_InitTypeDef NVIC_InitStructure;
     NVIC_InitStructure.NVIC_IRQChannel = TIM1_CC_IRQn; // ?对嘛
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
     NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;

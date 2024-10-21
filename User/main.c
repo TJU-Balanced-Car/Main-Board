@@ -56,7 +56,7 @@ int main(void)
     Serial_Init();
     Encoder_Init();
     MPU6050_Init();
-    Motor_Init();
+//    Motor_Init();
 
 	SystemCoreClockUpdate();
 	Delay_Init();
@@ -65,21 +65,21 @@ int main(void)
 	printf("Run Successfully!\r\n");
 
 
-	Motor1_SetSpeed(90);
-    Motor1_SetDir(1);
-    Motor2_SetSpeed(30);
-    Motor2_SetDir(1);
+//	Motor1_SetSpeed(0);
+//    Motor1_SetDir(1);
+//    Motor2_SetSpeed(0);
+//    Motor2_SetDir(1);
 
     Servo_SetAngle(90);
 
 	while(1)
     {
 
-	    printf("rpm: %d, dir: %d\n", Encoder1_Get_Rpm(), Encoder1_Get_Dir());
+	    printf("hightime1: %d, dir1: %d, hightime2: %d, dir2: %d\n", Encoder1_Get_HighTime(), Encoder1_Get_Dir(), Encoder2_Get_HighTime(), Encoder2_Get_Dir());
 //        Motor1_SetSpeed(70);
 //        Motor1_SetDir(1);
         Delay_Ms(1000);
-//        USART_SendData(/USART2, '1');
+//        USART_SendData(USART2, '1');
 //	    USART2_SendString("dsahgbksfjvk");
 //	    Motor1_SetDir(1);
 //	    Test_LED_Off();
