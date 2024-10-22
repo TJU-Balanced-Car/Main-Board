@@ -20,7 +20,7 @@
 
 #include <debug.h>
 #include "Servo.h"
-//#include "Buzzer.h"
+#include "Buzzer.h"
 #include "Serial.h"
 #include "MPU6050.h"
 #include "TestLED.h"
@@ -36,6 +36,11 @@
 uint8_t RxData;
 uint8_t ID;
 int16_t AX, AY, AZ, GX, GY, GZ;
+volatile uint16_t CNT, Num;
+volatile int32_t Motor1_is_there_speed = 1; // 标志位，指示速度是否为零
+volatile int32_t Motor2_is_there_speed = 1; // 标志位，指示速度是否为零
+volatile int32_t Motor1_lastCapture = 1; // 标志位，指示是否更新捕获
+volatile int32_t Motor2_lastCapture = 1; // 标志位，指示是否更新捕获
 //uint32_t TIM2_rpm = 0;
 //uint8_t TIM2_direction = 0;
 
@@ -49,14 +54,13 @@ int16_t AX, AY, AZ, GX, GY, GZ;
 int main(void)
 {
     Servo_PWM_Init();
-
-    //  Buzzer_Init();
-    //  Buzzer_Stop();
+    Buzzer_Init();
+    Buzzer_Stop();
     Test_LED_Init();
     Serial_Init();
     Encoder_Init();
     MPU6050_Init();
-//    Motor_Init();
+    Motor_Init();
 
 	SystemCoreClockUpdate();
 	Delay_Init();
@@ -71,14 +75,19 @@ int main(void)
 //    Motor2_SetDir(1);
 
     Servo_SetAngle(90);
-
 	while(1)
     {
+//	    printf("duty1: %d, dir1: %d, duty2: %d, dir2: %d\n", Motor1_GetFreq(), Motor1_GetDir(), Motor2_GetFreq(), Motor2_GetDir());
+	    Motor1_is_there_speed = (Motor1_lastCapture == TIM_GetCapture2(TIM1)) ? 0 : 1;
+        Motor2_is_there_speed = (Motor2_lastCapture == TIM_GetCapture2(TIM2)) ? 0 : 1;
+        Motor1_lastCapture = (TIM_GetCapture2(TIM1) != 0) ? TIM_GetCapture2(TIM1) : Motor1_lastCapture;
+        Motor2_lastCapture = (TIM_GetCapture2(TIM2) != 0) ? TIM_GetCapture2(TIM2) : Motor2_lastCapture;
 
-	    printf("duty1: %d, dir1: %d, duty2: %d, dir2: %d\n", Motor1_GetFreq(), Motor1_GetDir(), Motor2_GetFreq(), Motor2_GetDir());
-//        Motor1_SetSpeed(70);
+	    //        Motor1_SetSpeed(70);
 //        Motor1_SetDir(1);
-        Delay_Ms(500);
+//	    CNT = TIM_GetCounter(TIM5);
+//	    printf("CNT: %d", CNT);
+        Delay_Ms(50);
 //        USART_SendData(USART2, '1');
 //	    USART2_SendString("dsahgbksfjvk");
 //	    Motor1_SetDir(1);
@@ -106,4 +115,3 @@ int main(void)
 //	    }
 	}
 }
-

@@ -7,6 +7,10 @@
 
 #include "debug.h"
 
+extern int32_t Motor1_is_there_speed; // 标志位，指示速度是否为零
+extern int32_t Motor2_is_there_speed; // 标志位，指示速度是否为零
+
+
 //==========================================================
 //  函数名称：   Encoder_Init
 //  函数功能：   初始化获取电机转速与转向的编码器
@@ -93,7 +97,7 @@ uint32_t Motor2_GetDir(void)
 //==========================================================
 int32_t Motor1_GetFreq(void)
 {
-    return (Motor1_GetDir() == 1) ? 1000000 / TIM_GetCapture2(TIM1): (-1) * 1000000 / TIM_GetCapture2(TIM1);
+    return (Motor1_GetDir() == 1) ? Motor1_is_there_speed * 1000000 / TIM_GetCapture2(TIM1): Motor1_is_there_speed * (-1) * 1000000 / TIM_GetCapture2(TIM1);
 }
 
 //==========================================================
@@ -104,5 +108,5 @@ int32_t Motor1_GetFreq(void)
 //==========================================================
 int32_t Motor2_GetFreq(void)
 {
-    return (Motor2_GetDir() == 1) ? 1000000 / TIM_GetCapture2(TIM2) : (-1) * 1000000 / TIM_GetCapture2(TIM2);
+    return (Motor2_GetDir() == 1) ? Motor2_is_there_speed * 1000000 / TIM_GetCapture2(TIM2) : Motor2_is_there_speed * (-1) * 1000000 / TIM_GetCapture2(TIM2);
 }
