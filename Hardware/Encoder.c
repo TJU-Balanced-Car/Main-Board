@@ -7,6 +7,42 @@
 
 #include "debug.h"
 
+volatile int32_t Motor1_is_there_speed = 1; // 标志位，指示速度是否为零
+volatile int32_t Motor2_is_there_speed = 1; // 标志位，指示速度是否为零
+volatile int8_t Motor1_lastCapture = 1; // 标志位，指示是否更新捕获
+volatile int8_t Motor2_lastCapture = 1; // 标志位，指示是否更新捕获
+
+
+void TIM5_Init(void)
+{
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM5, ENABLE);
+
+    TIM_InternalClockConfig(TIM5);
+
+    TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure;
+    TIM_TimeBaseStructInit(&TIM_TimeBaseInitStructure);
+    TIM_TimeBaseInitStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+    TIM_TimeBaseInitStructure.TIM_CounterMode = TIM_CounterMode_Up;
+    TIM_TimeBaseInitStructure.TIM_Period = 10000 - 1; // 10ms
+    TIM_TimeBaseInitStructure.TIM_Prescaler = 14400 - 1; // 10kHz
+    TIM_TimeBaseInitStructure.TIM_RepetitionCounter = 0;
+    TIM_TimeBaseInit(TIM5, &TIM_TimeBaseInitStructure);
+
+    TIM_ITConfig(TIM5, TIM_IT_Update, ENABLE); // 使能更新中断
+
+
+    NVIC_InitTypeDef NVIC_InitStruct;
+    NVIC_InitStruct.NVIC_IRQChannel = TIM5_IRQn;
+    NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 2;
+    NVIC_InitStruct.NVIC_IRQChannelSubPriority = 1;
+    NVIC_Init(&NVIC_InitStruct);
+
+    TIM_Cmd(TIM5, ENABLE); // 启动定时器
+}
+
+
+
 //==========================================================
 //  函数名称：   Encoder_Init
 //  函数功能：   初始化获取电机转速与转向的编码器
@@ -15,6 +51,8 @@
 //==========================================================
 void Encoder_Init(void)
 {
+    TIM5_Init();
+
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOE, ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);
@@ -93,7 +131,7 @@ uint32_t Motor2_GetDir(void)
 //==========================================================
 int32_t Motor1_GetFreq(void)
 {
-    return (Motor1_GetDir() == 1) ? 1000000 / TIM_GetCapture2(TIM1): (-1) * 1000000 / TIM_GetCapture2(TIM1);
+    return (Motor1_GetDir() == 1) ? Motor1_is_there_speed * 1000000 / TIM_GetCapture2(TIM1): Motor1_is_there_speed * (-1) * 1000000 / TIM_GetCapture2(TIM1);
 }
 
 //==========================================================
@@ -104,5 +142,5 @@ int32_t Motor1_GetFreq(void)
 //==========================================================
 int32_t Motor2_GetFreq(void)
 {
-    return (Motor2_GetDir() == 1) ? 1000000 / TIM_GetCapture2(TIM2) : (-1) * 1000000 / TIM_GetCapture2(TIM2);
+    return (Motor2_GetDir() == 1) ? Motor2_is_there_speed * 1000000 / TIM_GetCapture2(TIM2) : Motor2_is_there_speed * (-1) * 1000000 / TIM_GetCapture2(TIM2);
 }
