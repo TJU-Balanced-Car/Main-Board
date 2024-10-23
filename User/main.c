@@ -100,9 +100,9 @@ int main(void)
 //        Motor2_SetDir(1);
 	    //Test_LED_Off();
 
-//	    MPU6050_GetData(&AX, &AY, &AZ, &GX, &GY, &GZ);
-//	    ID = MPU6050_GetID();
-//	    printf("ID:%d, AX:%d, AY:%d, AZ:%d, GX:%d, GY:%d, GZ:%d\n", ID, AX, AY, AZ, GX, GY, GZ);
+	    MPU6050_GetData(&AX, &AY, &AZ, &GX, &GY, &GZ);
+	    ID = MPU6050_GetID();
+	    printf("ID:%d, AX:%d, AY:%d, AZ:%d, GX:%d, GY:%d, GZ:%d\n", ID, AX, AY, AZ, GX, GY, GZ);
 
 //	    if (Serial_GetRxFlag() == 1)
 //	    {
