@@ -8,6 +8,8 @@
 
 # 不忽略Hardware文件夹及其所有内容
 !Hardware/*
+!Hardware/MPU6050/*
+!Debug/*
 
 # !.git/*
 !.gitignore
