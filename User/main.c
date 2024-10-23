@@ -23,9 +23,13 @@
 #include "Buzzer.h"
 #include "Serial.h"
 #include "MPU6050.h"
+#include "inv_mpu.h"
+#include "inv_mpu_dmp_motion_driver.h"
+#include "mpuiic.h"
 #include "TestLED.h"
 #include "Encoder.h"
 #include "Motor.h"
+#include "sys.h"
 
 
 /* Global typedef */
@@ -34,8 +38,11 @@
 
 /* Global Variable */
 uint8_t RxData;
-uint8_t ID;
-int16_t AX, AY, AZ, GX, GY, GZ;
+float Pitch, Roll, Yaw;
+int16_t ax, ay, az, gx, gy, gz;
+uint8_t MPU_Get_Gyroscope(short *gx, short *gy, short *gz);
+uint8_t MPU_Get_Accelerometer(short *ax, short *ay, short *az);
+
 volatile uint16_t CNT, Num;
 volatile int32_t Motor1_is_there_speed = 1; // 标志位，指示速度是否为零
 volatile int32_t Motor2_is_there_speed = 1; // 标志位，指示速度是否为零
@@ -59,7 +66,9 @@ int main(void)
     Test_LED_Init();
     Serial_Init();
     Encoder_Init();
-    MPU6050_Init();
+    while (MPU_Init()){printf("MPU Init Failed");};
+    printf("MPU Init Succeed");
+    mpu_dmp_init();
     Motor_Init();
 
 	SystemCoreClockUpdate();
@@ -100,9 +109,10 @@ int main(void)
 //        Motor2_SetDir(1);
 	    //Test_LED_Off();
 
-//	    MPU6050_GetData(&AX, &AY, &AZ, &GX, &GY, &GZ);
-//	    ID = MPU6050_GetID();
-//	    printf("ID:%d, AX:%d, AY:%d, AZ:%d, GX:%d, GY:%d, GZ:%d\n", ID, AX, AY, AZ, GX, GY, GZ);
+        mpu_dmp_get_data(&Pitch, &Roll, &Yaw);
+        MPU_Get_Gyroscope(&gx, &gy, &gz);
+        MPU_Get_Accelerometer(&ax, &ay, &az);
+	    printf("pitch:%d, roll:%d, yaw:%d, AX:%d, AY:%d, AZ:%d, GX:%d, GY:%d, GZ:%d\n", Pitch, Roll, Yaw, ax, ay, az, gx, gy, gz);
 
 //	    if (Serial_GetRxFlag() == 1)
 //	    {
