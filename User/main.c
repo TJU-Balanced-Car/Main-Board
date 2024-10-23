@@ -66,9 +66,8 @@ int main(void)
     Test_LED_Init();
     Serial_Init();
     Encoder_Init();
-    while (MPU_Init()){printf("MPU Init Failed");};
-    printf("MPU Init Succeed");
-    mpu_dmp_init();
+    while (mpu_dmp_init()){printf("MPU Init Failed\n");};
+    printf("MPU Init Succeed\n");
     Motor_Init();
 
 	SystemCoreClockUpdate();

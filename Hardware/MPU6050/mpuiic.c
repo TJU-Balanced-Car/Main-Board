@@ -9,35 +9,35 @@ void MPU_IIC_Delay(void)
 
 //初始化IIC
 void MPU_IIC_Init(void)
-{			
-	GPIO_InitTypeDef GPIO_InitStructure;
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE); //使能PB端口时钟
-	GPIO_InitStructure.GPIO_Pin = MPU6050_IIC_SCL_Pin|MPU6050_IIC_SDA_Pin;	//端口配置
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;      //推挽输出
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;     //50M
-	GPIO_Init(GPIOB, &GPIO_InitStructure);					      //根据设定参数初始化GPIOB 
+{
+    GPIO_InitTypeDef GPIO_InitStructure;
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE); //使能PB端口时钟
+    GPIO_InitStructure.GPIO_Pin = MPU6050_IIC_SCL_Pin|MPU6050_IIC_SDA_Pin;  //端口配置
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;      //推挽输出
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;     //50M
+    GPIO_Init(GPIOB, &GPIO_InitStructure);                        //根据设定参数初始化GPIOB
 }
 
 void MPU6050_IIC_SDA_IO_OUT(void)
 {
-//	My_GPIO_Init(MPU6050_IIC_GPIO,MPU6050_IIC_SDA_Pin,GPIO_TW_OUT,GPIO_P_NO,GPIO_50MHz);//推挽输出 不拉 50m
-	GPIO_InitTypeDef GPIO_InitStructure;
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE); //使能PB端口时钟
-	GPIO_InitStructure.GPIO_Pin = MPU6050_IIC_SDA_Pin;	//端口配置
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;      //推挽输出
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;     //50M
-	GPIO_Init(GPIOB, &GPIO_InitStructure);
+//  My_GPIO_Init(MPU6050_IIC_GPIO,MPU6050_IIC_SDA_Pin,GPIO_TW_OUT,GPIO_P_NO,GPIO_50MHz);//推挽输出 不拉 50m
+    GPIO_InitTypeDef GPIO_InitStructure;
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE); //使能PB端口时钟
+    GPIO_InitStructure.GPIO_Pin = MPU6050_IIC_SDA_Pin;  //端口配置
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;      //推挽输出
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;     //50M
+    GPIO_Init(GPIOB, &GPIO_InitStructure);
 }
 
 void MPU6050_IIC_SDA_IO_IN(void)
 {
-//	My_GPIO_Init(MPU6050_IIC_GPIO,MPU6050_IIC_SDA_Pin,GPIO_FK_IN,GPIO_P_UP,GPIO_50MHz);//浮空输入 上拉 50m
-	GPIO_InitTypeDef GPIO_InitStructure;
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE); //使能PB端口时钟
-	GPIO_InitStructure.GPIO_Pin =MPU6050_IIC_SDA_Pin;	//端口配置
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;      //推挽输出
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;     //50M
-	GPIO_Init(GPIOB, &GPIO_InitStructure);
+//  My_GPIO_Init(MPU6050_IIC_GPIO,MPU6050_IIC_SDA_Pin,GPIO_FK_IN,GPIO_P_UP,GPIO_50MHz);//浮空输入 上拉 50m
+    GPIO_InitTypeDef GPIO_InitStructure;
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE); //使能PB端口时钟
+    GPIO_InitStructure.GPIO_Pin =MPU6050_IIC_SDA_Pin;   //端口配置
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;      //推挽输出
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;     //50M
+    GPIO_Init(GPIOB, &GPIO_InitStructure);
 }
 //产生IIC起始信号
 void MPU_IIC_Start(void)
