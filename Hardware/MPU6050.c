@@ -5,10 +5,32 @@
  *      Author: jacob
  */
 
+/*
+ *  卡尔曼滤波部分移植了Github库开源代码：https://github.com/leech001/MPU6050
+ */
+
+#include <time.h>
+#include <math.h>
 #include "debug.h"
+#include "MPU6050.h"
 #include "MPU6050_Reg.h"
 
 #define MPU6050_ADDRESS     0xD0
+#define RAD_TO_DEG 57.295779513082320876798154814105
+
+const double Accel_Z_corrector = 14418.0;
+uint32_t timer;
+
+Kalman_t KalmanX = {
+    .Q_angle = 0.001f,
+    .Q_bias = 0.003f,
+    .R_measure = 0.03f};
+
+Kalman_t KalmanY = {
+    .Q_angle = 0.001f,
+    .Q_bias = 0.003f,
+    .R_measure = 0.03f,
+};
 
 //==========================================================
 //  函数名称：   MPU6050_WaitEvent
@@ -174,3 +196,121 @@ void MPU6050_GetData(int16_t *AccX, int16_t *AccY, int16_t *AccZ,
     DataL = MPU6050_ReadReg(MPU6050_GYRO_ZOUT_L);
     *GyroZ = (DataH << 8) | DataL;
 }
+
+//==========================================================
+//  函数名称：   MPU6050_Read_All
+//  函数功能：   获取并计算MPU6050的数据
+//  入口参数：   MPU6050_t类型结构体
+//  返回参数：   无
+//==========================================================
+void MPU6050_Read_All(MPU6050_t *DataStruct)
+{
+    uint8_t Rec_Data[12];
+
+    // Read 12 BYTES of data starting from ACCEL_XOUT_H register
+
+    Rec_Data[0] = MPU6050_ReadReg(MPU6050_ACCEL_XOUT_H);
+    Rec_Data[1] = MPU6050_ReadReg(MPU6050_ACCEL_XOUT_L);
+
+    // 读取加速度计 Y 轴数据
+    Rec_Data[2] = MPU6050_ReadReg(MPU6050_ACCEL_YOUT_H);
+    Rec_Data[3] = MPU6050_ReadReg(MPU6050_ACCEL_YOUT_L);
+
+    // 读取加速度计 Z 轴数据
+    Rec_Data[4] = MPU6050_ReadReg(MPU6050_ACCEL_ZOUT_H);
+    Rec_Data[5] = MPU6050_ReadReg(MPU6050_ACCEL_ZOUT_L);
+
+
+    // 读取陀螺仪 X 轴数据
+    Rec_Data[6] = MPU6050_ReadReg(MPU6050_GYRO_XOUT_H);
+    Rec_Data[7] = MPU6050_ReadReg(MPU6050_GYRO_XOUT_L);
+
+    // 读取陀螺仪 Y 轴数据
+    Rec_Data[8] = MPU6050_ReadReg(MPU6050_GYRO_YOUT_H);
+    Rec_Data[9] = MPU6050_ReadReg(MPU6050_GYRO_YOUT_L);
+
+    // 读取陀螺仪 Z 轴数据
+    Rec_Data[10] = MPU6050_ReadReg(MPU6050_GYRO_ZOUT_H);
+    Rec_Data[11] = MPU6050_ReadReg(MPU6050_GYRO_ZOUT_L);
+
+    DataStruct->Accel_X_RAW = (int16_t)(Rec_Data[0] << 8 | Rec_Data[1]);
+    DataStruct->Accel_Y_RAW = (int16_t)(Rec_Data[2] << 8 | Rec_Data[3]);
+    DataStruct->Accel_Z_RAW = (int16_t)(Rec_Data[4] << 8 | Rec_Data[5]);
+    DataStruct->Gyro_X_RAW = (int16_t)(Rec_Data[6] << 8 | Rec_Data[7]);
+    DataStruct->Gyro_Y_RAW = (int16_t)(Rec_Data[8] << 8 | Rec_Data[9]);
+    DataStruct->Gyro_Z_RAW = (int16_t)(Rec_Data[10] << 8 | Rec_Data[11]);
+
+    DataStruct->Ax = DataStruct->Accel_X_RAW / 16384.0;
+    DataStruct->Ay = DataStruct->Accel_Y_RAW / 16384.0;
+    DataStruct->Az = DataStruct->Accel_Z_RAW / Accel_Z_corrector;
+    DataStruct->Gx = DataStruct->Gyro_X_RAW / 131.0;
+    DataStruct->Gy = DataStruct->Gyro_Y_RAW / 131.0;
+    DataStruct->Gz = DataStruct->Gyro_Z_RAW / 131.0;
+
+    // Kalman angle solve
+    double dt = (double)(clock() - timer) / CLOCKS_PER_SEC;
+    timer = clock();
+    double roll;
+    double roll_sqrt = sqrt(
+        DataStruct->Accel_X_RAW * DataStruct->Accel_X_RAW + DataStruct->Accel_Z_RAW * DataStruct->Accel_Z_RAW);
+    if (roll_sqrt != 0.0)
+    {
+        roll = atan(DataStruct->Accel_Y_RAW / roll_sqrt) * RAD_TO_DEG;
+    }
+    else
+    {
+        roll = 0.0;
+    }
+    double pitch = atan2(-DataStruct->Accel_X_RAW, DataStruct->Accel_Z_RAW) * RAD_TO_DEG;
+    if ((pitch < -90 && DataStruct->KalmanAngleY > 90) || (pitch > 90 && DataStruct->KalmanAngleY < -90))
+    {
+        KalmanY.angle = pitch;
+        DataStruct->KalmanAngleY = pitch;
+    }
+    else
+    {
+        DataStruct->KalmanAngleY = Kalman_getAngle(&KalmanY, pitch, DataStruct->Gy, dt);
+    }
+    if (fabs(DataStruct->KalmanAngleY) > 90)
+        DataStruct->Gx = -DataStruct->Gx;
+    DataStruct->KalmanAngleX = Kalman_getAngle(&KalmanX, roll, DataStruct->Gx, dt);
+}
+
+//==========================================================
+//  函数名称：   Kalman_getAngle
+//  函数功能：   卡尔曼滤波计算函数
+//  入口参数：   Kalman - 指向卡尔曼滤波器结构体的指针
+//          newAngle - 新的角度值。
+//          newRate - 新的角速度值。
+//          dt - 时间间隔。
+//  返回参数：   更新后的角度
+//==========================================================
+double Kalman_getAngle(Kalman_t *Kalman, double newAngle, double newRate, double dt)
+{
+    double rate = newRate - Kalman->bias;
+    Kalman->angle += dt * rate;
+
+    Kalman->P[0][0] += dt * (dt * Kalman->P[1][1] - Kalman->P[0][1] - Kalman->P[1][0] + Kalman->Q_angle);
+    Kalman->P[0][1] -= dt * Kalman->P[1][1];
+    Kalman->P[1][0] -= dt * Kalman->P[1][1];
+    Kalman->P[1][1] += Kalman->Q_bias * dt;
+
+    double S = Kalman->P[0][0] + Kalman->R_measure;
+    double K[2];
+    K[0] = Kalman->P[0][0] / S;
+    K[1] = Kalman->P[1][0] / S;
+
+    double y = newAngle - Kalman->angle;
+    Kalman->angle += K[0] * y;
+    Kalman->bias += K[1] * y;
+
+    double P00_temp = Kalman->P[0][0];
+    double P01_temp = Kalman->P[0][1];
+
+    Kalman->P[0][0] -= K[0] * P00_temp;
+    Kalman->P[0][1] -= K[0] * P01_temp;
+    Kalman->P[1][0] -= K[1] * P00_temp;
+    Kalman->P[1][1] -= K[1] * P01_temp;
+
+    return Kalman->angle;
+};
