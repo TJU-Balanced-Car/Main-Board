@@ -35,7 +35,6 @@
 /* Global Variable */
 uint8_t RxData;
 uint8_t ID;
-int16_t AX, AY, AZ, GX, GY, GZ;
 MPU6050_t MPU6050_Data;
 volatile uint16_t CNT, Num;
 volatile int32_t Motor1_is_there_speed = 1; // 标志位，指示速度是否为零
@@ -88,7 +87,7 @@ int main(void)
 //        Motor1_SetDir(1);
 //	    CNT = TIM_GetCounter(TIM5);
 //	    printf("CNT: %d", CNT);
-        Delay_Ms(1000);
+//        Delay_Ms(10);
 //        USART_SendData(USART2, '1');
 //	    USART2_SendString("dsahgbksfjvk");
 //	    Motor1_SetDir(1);
@@ -102,12 +101,10 @@ int main(void)
 	    //Test_LED_Off();
 
         MPU6050_Read_All(&MPU6050_Data);
-//	    MPU6050_GetData(&AX, &AY, &AZ, &GX, &GY, &GZ);
 	    ID = MPU6050_GetID();
-//	    printf("ID:%d, AX:%d, AY:%d, AZ:%d, GX:%d, GY:%d, GZ:%d\n", ID, AX, AY, AZ, GX, GY, GZ);
-        printf("ID:%d, AX:%d, AY:%d, AZ:%d, GX:%d, GY:%d, GZ:%d\n", ID,
-                MPU6050_Data.Accel_X_RAW, MPU6050_Data.Accel_Y_RAW, MPU6050_Data.Accel_Z_RAW,
-                MPU6050_Data.Gyro_X_RAW, MPU6050_Data.Gyro_Y_RAW, MPU6050_Data.Gyro_Z_RAW);
+//	    printf("ID:%d, AX:%d, AY:%d, AZ:%d, GX:%d, GY:%d, GZ:%d\n", ID,
+//                MPU6050_Data.Accel_X_RAW, MPU6050_Data.Accel_Y_RAW, MPU6050_Data.Accel_Z_RAW,
+//                MPU6050_Data.Gyro_X_RAW, MPU6050_Data.Gyro_Y_RAW, MPU6050_Data.Gyro_Z_RAW);
 	    printf("KalmanAngleX:%f, KalmanAngleY:%f\n",
 	            MPU6050_Data.KalmanAngleX, MPU6050_Data.KalmanAngleY);
 

@@ -235,7 +235,7 @@ void MPU6050_Read_All(MPU6050_t *DataStruct)
 
     DataStruct->Accel_X_RAW = (int16_t)(Rec_Data[0] << 8 | Rec_Data[1]);
     DataStruct->Accel_Y_RAW = (int16_t)(Rec_Data[2] << 8 | Rec_Data[3]);
-    DataStruct->Accel_Z_RAW = (int16_t)(Rec_Data[4] << 8 | Rec_Data[5]);
+    DataStruct->Accel_Z_RAW = -(int16_t)(Rec_Data[4] << 8 | Rec_Data[5]);
     DataStruct->Gyro_X_RAW = (int16_t)(Rec_Data[6] << 8 | Rec_Data[7]);
     DataStruct->Gyro_Y_RAW = (int16_t)(Rec_Data[8] << 8 | Rec_Data[9]);
     DataStruct->Gyro_Z_RAW = (int16_t)(Rec_Data[10] << 8 | Rec_Data[11]);
