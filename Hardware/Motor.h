@@ -13,5 +13,7 @@ void Motor1_SetSpeed(float Speed);
 void Motor2_SetSpeed(float Speed);
 void Motor1_SetDir(uint8_t Dir);
 void Motor2_SetDir(uint8_t Dir);
+void PWM_Limit(int *pwm);
+void Motor_Stop(float Angle);
 
 #endif /* HARDWARE_MOTOR_H_ */

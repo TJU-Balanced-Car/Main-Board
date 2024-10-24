@@ -7,6 +7,9 @@
 
 #include "debug.h"
 
+#define  PWM_MAX    13000
+#define  PWM_MIN   -13000
+
 //==========================================================
 //  函数名称：   Motor_Init
 //  函数功能：   初始化两个电机
@@ -36,8 +39,8 @@ void Motor_Init(void)
     TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure; // TimeBaseInit结构体
     TIM_TimeBaseInitStructure.TIM_ClockDivision = TIM_CKD_DIV1; // 滤波器采样频率分频
     TIM_TimeBaseInitStructure.TIM_CounterMode = TIM_CounterMode_Up; // 计数模式
-    TIM_TimeBaseInitStructure.TIM_Period = 100 - 1; // 周期，ARR自动重装器
-    TIM_TimeBaseInitStructure.TIM_Prescaler = 72 - 1; // PSC预分频器
+    TIM_TimeBaseInitStructure.TIM_Period = 7200 - 1; // 周期，ARR自动重装器
+    TIM_TimeBaseInitStructure.TIM_Prescaler = 1 - 1; // PSC预分频器
     TIM_TimeBaseInitStructure.TIM_RepetitionCounter = 0; // 重复计数器
     TIM_TimeBaseInit(TIM3, &TIM_TimeBaseInitStructure); // 时基单元初始化
 
@@ -69,6 +72,12 @@ void Motor_Init(void)
 //==========================================================
 void Motor1_SetSpeed(float Speed)
 {
+    if (Speed >= 0) Motor1_SetDir(1);
+    else if (Speed < 0)
+    {
+        Motor1_SetDir(0);
+        Speed = -Speed;
+    }
     TIM_SetCompare3(TIM3, Speed / 2); // 保持在0到100范围内
 }
 
@@ -111,3 +120,31 @@ void Motor2_SetDir(uint8_t Dir)
     else Bit = Bit_RESET;
     GPIO_WriteBit(GPIOC, GPIO_Pin_7, Bit);
 }
+
+//==========================================================
+//  函数名称：   PWM_Limit
+//  函数功能：   PWM限幅
+//  入口参数：   pwm变量地址
+//  返回参数：   无
+//==========================================================
+void PWM_Limit(int *pwm)
+{
+    if(*pwm > PWM_MAX) *pwm = PWM_MAX;
+    else if(*pwm <= PWM_MIN) *pwm = PWM_MIN;
+}
+
+//==========================================================
+//  函数名称：   Motor_Stop
+//  函数功能：   小车倾角过大时，电机紧急停车，保护小车
+//  入口参数：   小车倾角
+//  返回参数：   无
+//==========================================================
+void Motor_Stop(float Angle)
+{
+    if(Angle > 45 || Angle < -45)
+    {
+        Motor1_SetSpeed(0);
+        Motor2_SetSpeed(0);
+    }
+}
+

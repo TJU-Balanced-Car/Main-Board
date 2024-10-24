@@ -248,8 +248,9 @@ void MPU6050_Read_All(MPU6050_t *DataStruct)
     DataStruct->Gz = DataStruct->Gyro_Z_RAW / 131.0;
 
     // Kalman angle solve
-    double dt = (double)(clock() - timer) / CLOCKS_PER_SEC;
-    timer = clock();
+    double dt = 0.01;
+//    double dt = (double)(clock() - timer) / CLOCKS_PER_SEC;
+//    timer = clock();
     double roll;
     double roll_sqrt = sqrt(
         DataStruct->Accel_X_RAW * DataStruct->Accel_X_RAW + DataStruct->Accel_Z_RAW * DataStruct->Accel_Z_RAW);

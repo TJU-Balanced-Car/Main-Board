@@ -26,6 +26,7 @@
 #include "TestLED.h"
 #include "Encoder.h"
 #include "Motor.h"
+#include "control.h"
 
 
 /* Global typedef */
@@ -35,12 +36,13 @@
 /* Global Variable */
 uint8_t RxData;
 uint8_t ID;
-MPU6050_t MPU6050_Data;
 volatile uint16_t CNT, Num;
 volatile int32_t Motor1_is_there_speed = 1; // 标志位，指示速度是否为零
 volatile int32_t Motor2_is_there_speed = 1; // 标志位，指示速度是否为零
 volatile int32_t Motor1_lastCapture = 1; // 标志位，指示是否更新捕获
 volatile int32_t Motor2_lastCapture = 1; // 标志位，指示是否更新捕获
+float Vertical_Kp=-820,Vertical_Kd=3.5;                  //直立环KP、KD
+float Velocity_Kp=-58,Velocity_Ki=-0.25;                  //速度环KP、KI
 //uint32_t TIM2_rpm = 0;
 //uint8_t TIM2_direction = 0;
 
@@ -69,10 +71,10 @@ int main(void)
 	printf("Run Successfully!\r\n");
 
 
-//	Motor1_SetSpeed(0);
-//    Motor1_SetDir(1);
-//    Motor2_SetSpeed(0);
-//    Motor2_SetDir(1);
+	Motor1_SetSpeed(0);
+    Motor1_SetDir(1);
+    Motor2_SetSpeed(0);
+    Motor2_SetDir(1);
 
     Servo_SetAngle(90);
 	while(1)
@@ -95,27 +97,31 @@ int main(void)
 //	    Delay_Ms(10);
 //	    Motor1_SetDir(0);
 //	    Test_LED_On();
-//	    Delay_Ms(10);
+	    Delay_Ms(10);
 //        Motor2_SetSpeed(70);
 //        Motor2_SetDir(1);
 	    //Test_LED_Off();
 
-        MPU6050_Read_All(&MPU6050_Data);
-	    ID = MPU6050_GetID();
+        PID_Control();
 //	    printf("ID:%d, AX:%d, AY:%d, AZ:%d, GX:%d, GY:%d, GZ:%d\n", ID,
 //                MPU6050_Data.Accel_X_RAW, MPU6050_Data.Accel_Y_RAW, MPU6050_Data.Accel_Z_RAW,
 //                MPU6050_Data.Gyro_X_RAW, MPU6050_Data.Gyro_Y_RAW, MPU6050_Data.Gyro_Z_RAW);
-	    printf("KalmanAngleX:%f, KalmanAngleY:%f\n",
-	            MPU6050_Data.KalmanAngleX, MPU6050_Data.KalmanAngleY);
 
 //	    if (Serial_GetRxFlag() == 1)
 //	    {
-//	        RxData = Serial_GetRxData();
-//	        printf(RxData);
+//	        printf("RXXXXXXXXXXXXXXXXXXXXXXX\n");
+//	        if(Serial_RxPacket[0] == 'p')
+//	        {
+//	            Vertical_Kp = (float)(*(Serial_RxPacket + 1));
+//	            printf("Vertical_Kp:%f OK!\n", Vertical_Kp);
+//	        }
+//	        else if(Serial_RxPacket[0] == 'd')
+//            {
+//                Vertical_Kd = (float)(*(Serial_RxPacket + 1));
+//                printf("Vertical_Kd:%f OK!\n", Vertical_Kd);
+//            }
 //	    }
-//	    if (Serial_GetRxFlag() == 1)
-//	    {
-//	        printf(Serial_RxPacket[0], Serial_RxPacket[1], Serial_RxPacket[2]);
-//	    }
+
+	    //printf("clock:%f, Vertical_Kp:%f, Vertical_Kd:%f", clock(), Vertical_Kp, Vertical_Kd);
 	}
 }

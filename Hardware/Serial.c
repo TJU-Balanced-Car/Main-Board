@@ -9,8 +9,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-uint8_t Serial_TxPacket[3];
-uint8_t Serial_RxPacket[3];
+char Serial_RxPacket[100];
 uint8_t Serial_RxFlag;
 
 //==========================================================
@@ -188,19 +187,6 @@ uint8_t Serial_GetRxFlag(void)
 }
 
 //==========================================================
-//  函数名称：   USART2_SendPacket
-//  函数功能：   通过USART2发送数据包
-//  入口参数：   无
-//  返回参数：   无
-//==========================================================
-void USART2_SendPacket(void)
-{
-    USART2_SendByte(0xFF);
-    USART2_SendArray(Serial_TxPacket);
-    USART2_SendByte(0xFE);
-}
-
-//==========================================================
 //  函数名称：   USART2_IRQHandler
 //  函数功能：   串口中断服务函数
 //  入口参数：   无
@@ -216,7 +202,7 @@ void USART2_IRQHandler(void)
 
         if (RxState == 0)
         {
-            if (RxData == 0xFF)
+            if (RxData == '@')
             {
                 RxData = 1;
                 pRxPacket = 0;
@@ -224,17 +210,24 @@ void USART2_IRQHandler(void)
         }
         else if (RxState == 1)
         {
-            Serial_RxPacket[pRxPacket] = RxData;
-            pRxPacket ++;
-            if (pRxPacket >= 4) RxState = 2;
-
+            if (RxData == '\r')
+            {
+                RxState = 2;
+            }
+            else
+            {
+                Serial_RxPacket[pRxPacket] = RxData;
+                pRxPacket ++;
+            }
         }
         else if (RxState == 2)
         {
-            if (RxData == 0xFE)
+            if (RxData == '\n')
             {
                 RxState = 0;
+                Serial_RxPacket[pRxPacket] = '\0';
                 Serial_RxFlag = 1;
+
             }
         }
 
