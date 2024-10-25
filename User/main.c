@@ -23,10 +23,14 @@
 #include "Buzzer.h"
 #include "Serial.h"
 #include "MPU6050.h"
+#include "inv_mpu.h"
+#include "inv_mpu_dmp_motion_driver.h"
+#include "mpuiic.h"
 #include "TestLED.h"
 #include "Encoder.h"
 #include "Motor.h"
 #include "control.h"
+#include "sys.h"
 
 
 /* Global typedef */
@@ -36,13 +40,18 @@
 /* Global Variable */
 uint8_t RxData;
 uint8_t ID;
+float Pitch, Roll, Yaw;
+short ax, ay, az, gx, gy, gz;
+uint8_t MPU_Get_Gyroscope(short *gx, short *gy, short *gz);
+uint8_t MPU_Get_Accelerometer(short *ax, short *ay, short *az);
+
 volatile uint16_t CNT, Num;
-volatile int32_t Motor1_is_there_speed = 1; // ±êÖ¾Î»£¬Ö¸Ê¾ËÙ¶ÈÊÇ·ñÎªÁã
-volatile int32_t Motor2_is_there_speed = 1; // ±êÖ¾Î»£¬Ö¸Ê¾ËÙ¶ÈÊÇ·ñÎªÁã
-volatile int32_t Motor1_lastCapture = 1; // ±êÖ¾Î»£¬Ö¸Ê¾ÊÇ·ñ¸üÐÂ²¶»ñ
-volatile int32_t Motor2_lastCapture = 1; // ±êÖ¾Î»£¬Ö¸Ê¾ÊÇ·ñ¸üÐÂ²¶»ñ
-float Vertical_Kp=-820,Vertical_Kd=3.5;                  //Ö±Á¢»·KP¡¢KD
-float Velocity_Kp=-58,Velocity_Ki=-0.25;                  //ËÙ¶È»·KP¡¢KI
+volatile int32_t Motor1_is_there_speed = 1; // ï¿½ï¿½Ö¾Î»ï¿½ï¿½Ö¸Ê¾ï¿½Ù¶ï¿½ï¿½Ç·ï¿½Îªï¿½ï¿½
+volatile int32_t Motor2_is_there_speed = 1; // ï¿½ï¿½Ö¾Î»ï¿½ï¿½Ö¸Ê¾ï¿½Ù¶ï¿½ï¿½Ç·ï¿½Îªï¿½ï¿½
+volatile int32_t Motor1_lastCapture = 1; // ï¿½ï¿½Ö¾Î»ï¿½ï¿½Ö¸Ê¾ï¿½Ç·ï¿½ï¿½ï¿½Â²ï¿½ï¿½ï¿½
+volatile int32_t Motor2_lastCapture = 1; // ï¿½ï¿½Ö¾Î»ï¿½ï¿½Ö¸Ê¾ï¿½Ç·ï¿½ï¿½ï¿½Â²ï¿½ï¿½ï¿½
+float Vertical_Kp=-820,Vertical_Kd=3.5;                  //Ö±ï¿½ï¿½ï¿½ï¿½KPï¿½ï¿½KD
+float Velocity_Kp=-58,Velocity_Ki=-0.25;                  //ï¿½Ù¶È»ï¿½KPï¿½ï¿½KI
 //uint32_t TIM2_rpm = 0;
 //uint8_t TIM2_direction = 0;
 
@@ -61,7 +70,8 @@ int main(void)
     Test_LED_Init();
     Serial_Init();
     Encoder_Init();
-    MPU6050_Init();
+    while (mpu_dmp_init()){printf("MPU Init Failed\n");};
+    printf("MPU Init Succeed\n");
     Motor_Init();
 
 	SystemCoreClockUpdate();
@@ -106,6 +116,10 @@ int main(void)
 //	    printf("ID:%d, AX:%d, AY:%d, AZ:%d, GX:%d, GY:%d, GZ:%d\n", ID,
 //                MPU6050_Data.Accel_X_RAW, MPU6050_Data.Accel_Y_RAW, MPU6050_Data.Accel_Z_RAW,
 //                MPU6050_Data.Gyro_X_RAW, MPU6050_Data.Gyro_Y_RAW, MPU6050_Data.Gyro_Z_RAW);
+        mpu_dmp_get_data(&Pitch, &Roll, &Yaw);
+        MPU_Get_Gyroscope(&gx, &gy, &gz);
+        MPU_Get_Accelerometer(&ax, &ay, &az);
+	    printf("pitch:%f, roll:%f, yaw:%f, AX:%d, AY:%d, AZ:%d, GX:%d, GY:%d, GZ:%d\n", Pitch, Roll, Yaw, ax, ay, -az, gx, gy, gz);
 
 //	    if (Serial_GetRxFlag() == 1)
 //	    {
