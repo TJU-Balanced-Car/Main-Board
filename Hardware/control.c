@@ -14,7 +14,7 @@ int PWM1;                                           //最终输出
 int Encoder_Motor;	                                //动量轮驱动电机编码器数据（速度）
 
 
-float Med_Angle=1.15;	                                //机械中值---在这里修改你的机械中值即可。
+float Med_Angle=-2.5;	                                //机械中值---在这里修改你的机械中值即可。
 extern float Vertical_Kp, Vertical_Kd, Velocity_Kp, Velocity_Ki;                 //速度环KP、KI
 
 
@@ -31,15 +31,14 @@ void PID_Control(void)
     gyroy = MPU6050_Data.Gyro_Y_RAW;
     gyroz = MPU6050_Data.Gyro_Z_RAW;
 
-    printf("Angle:%f, Vertical_out:%d, PWM1:%d\n", Roll, Vertical_out, PWM1);
-
     Vertical_out=Vertical(Med_Angle,Roll,gyrox);//直立环
     Velocity_out=Velocity(Encoder_Motor);	    //速度环
 
     //2.把控制输出量加载到电机上，完成最终的的控制。
     PWM1=Vertical_out;
 //            +Velocity_out;            //最终输出
-//    PWM_Limit(&PWM1);
+    PWM_Limit(&PWM1);
+    printf("Angle:%f, Vertical_out:%d, PWM1:%d\n", Roll, Vertical_out, PWM1);
     Motor1_SetSpeed(PWM1);
     Motor_Stop(Roll);
 }

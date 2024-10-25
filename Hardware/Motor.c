@@ -6,6 +6,8 @@
  */
 
 #include "debug.h"
+#include "Buzzer.h"
+#include "Motor.h"
 
 #define  PWM_MAX    13000
 #define  PWM_MIN   -13000
@@ -141,10 +143,14 @@ void PWM_Limit(int *pwm)
 //==========================================================
 void Motor_Stop(float Angle)
 {
-    if(Angle > 45 || Angle < -45)
+    if(Angle > 30 || Angle < -30)
     {
         Motor1_SetSpeed(0);
         Motor2_SetSpeed(0);
+        Buzzer_Ring();
+    }
+    else {
+        Buzzer_Stop();
     }
 }
 
