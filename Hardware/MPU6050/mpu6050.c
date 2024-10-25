@@ -2,7 +2,7 @@
 #include "sys.h"
 #include <debug.h>
 
-
+#define MPU6050_ADDRESS     0xD0
 
 //初始化MPU6050
 //返回值:0,成功
@@ -130,25 +130,22 @@ u8 MPU_Get_Accelerometer(short *ax,short *ay,short *az)
 u8 MPU_Write_Len(u8 addr,u8 reg,u8 len,u8 *buf)
 {
 	u8 i; 
-    MPU_IIC_Start(); 
-	MPU_IIC_Send_Byte((addr<<1)|0);//发送器件地址+写命令	
-	if(MPU_IIC_Wait_Ack())	//等待应答
-	{
-		MPU_IIC_Stop();		 
-		return 1;		
-	}
-    MPU_IIC_Send_Byte(reg);	//写寄存器地址
-    MPU_IIC_Wait_Ack();		//等待应答
+    I2C_GenerateSTART(I2C2, ENABLE);
+    if (MPU6050_WaitEvent(I2C_EVENT_MASTER_MODE_SELECT)) return 1;
+
+    I2C_Send7bitAddress(I2C2, MPU6050_ADDRESS, I2C_Direction_Transmitter);
+    if (MPU6050_WaitEvent(I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)) return 1;
+
+    I2C_SendData(I2C2, reg);
+
 	for(i=0;i<len;i++)
 	{
-		MPU_IIC_Send_Byte(buf[i]);	//发送数据
-		if(MPU_IIC_Wait_Ack())		//等待ACK
-		{
-			MPU_IIC_Stop();	 
-			return 1;		 
-		}		
-	}    
-    MPU_IIC_Stop();	 
+	    if (MPU6050_WaitEvent(I2C_EVENT_MASTER_BYTE_TRANSMITTING)) return 1;
+	    I2C_SendData(I2C2, buf[i]);
+
+	}
+    if (MPU6050_WaitEvent(I2C_EVENT_MASTER_BYTE_TRANSMITTED)) return 1;
+    I2C_GenerateSTOP(I2C2, ENABLE);
 	return 0;	
 } 
 //IIC连续读
@@ -160,26 +157,42 @@ u8 MPU_Write_Len(u8 addr,u8 reg,u8 len,u8 *buf)
 //    其他,错误代码
 u8 MPU_Read_Len(u8 addr,u8 reg,u8 len,u8 *buf)
 { 
- 	MPU_IIC_Start(); 
-	MPU_IIC_Send_Byte((addr<<1)|0);//发送器件地址+写命令	
-	if(MPU_IIC_Wait_Ack())	//等待应答
-	{
-		MPU_IIC_Stop();		 
-		return 1;		
-	}
-    MPU_IIC_Send_Byte(reg);	//写寄存器地址
-    MPU_IIC_Wait_Ack();		//等待应答
-    MPU_IIC_Start();
-	MPU_IIC_Send_Byte((addr<<1)|1);//发送器件地址+读命令	
-    MPU_IIC_Wait_Ack();		//等待应答 
+    I2C_GenerateSTART(I2C2, ENABLE);
+    MPU6050_WaitEvent(I2C_EVENT_MASTER_MODE_SELECT);
+
+    I2C_Send7bitAddress(I2C2, MPU6050_ADDRESS, I2C_Direction_Transmitter);
+    MPU6050_WaitEvent(I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED);
+
+    I2C_SendData(I2C2, reg);
+    MPU6050_WaitEvent(I2C_EVENT_MASTER_BYTE_TRANSMITTED);
+
+    I2C_GenerateSTART(I2C2, ENABLE);
+    MPU6050_WaitEvent(I2C_EVENT_MASTER_MODE_SELECT);
+
+    I2C_Send7bitAddress(I2C2, MPU6050_ADDRESS, I2C_Direction_Receiver);
+    MPU6050_WaitEvent(I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED);
+
+
+
+    I2C_AcknowledgeConfig(I2C2, ENABLE);
 	while(len)
 	{
-		if(len==1)*buf=MPU_IIC_Read_Byte(0);//读数据,发送nACK 
-		else *buf=MPU_IIC_Read_Byte(1);		//读数据,发送ACK  
+		if(len==1)
+        {
+		    I2C_AcknowledgeConfig(I2C2, DISABLE);
+            I2C_GenerateSTOP(I2C2, ENABLE);
+            MPU6050_WaitEvent(I2C_EVENT_MASTER_BYTE_RECEIVED);
+		    *buf=I2C_ReceiveData(I2C2);//读数据,发送nACK
+        }
+		else
+        {
+            MPU6050_WaitEvent(I2C_EVENT_MASTER_BYTE_RECEIVED);
+            *buf=I2C_ReceiveData(I2C2);		//读数据,发送ACK
+        }
 		len--;
 		buf++; 
 	}    
-    MPU_IIC_Stop();	//产生一个停止条件 
+    I2C_AcknowledgeConfig(I2C2, ENABLE);
 	return 0;	
 }
 //IIC写一个字节 
@@ -189,23 +202,20 @@ u8 MPU_Read_Len(u8 addr,u8 reg,u8 len,u8 *buf)
 //    其他,错误代码
 u8 MPU_Write_Byte(u8 reg,u8 data) 				 
 { 
-    MPU_IIC_Start(); 
-	MPU_IIC_Send_Byte((MPU_ADDR<<1)|0);//发送器件地址+写命令	
-	if(MPU_IIC_Wait_Ack())	//等待应答
-	{
-		MPU_IIC_Stop();		 
-		return 1;		
-	}
-    MPU_IIC_Send_Byte(reg);	//写寄存器地址
-    MPU_IIC_Wait_Ack();		//等待应答 
-	MPU_IIC_Send_Byte(data);//发送数据
-	if(MPU_IIC_Wait_Ack())	//等待ACK
-	{
-		MPU_IIC_Stop();	 
-		return 1;		 
-	}		 
-    MPU_IIC_Stop();	 
-	return 0;
+	I2C_GenerateSTART(I2C2, ENABLE);
+    if (MPU6050_WaitEvent(I2C_EVENT_MASTER_MODE_SELECT)) return 1;
+
+    I2C_Send7bitAddress(I2C2, MPU6050_ADDRESS, I2C_Direction_Transmitter);
+    if (MPU6050_WaitEvent(I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)) return 1;
+
+    I2C_SendData(I2C2, reg);
+    if (MPU6050_WaitEvent(I2C_EVENT_MASTER_BYTE_TRANSMITTING)) return 1;
+
+    I2C_SendData(I2C2, data);
+    if (MPU6050_WaitEvent(I2C_EVENT_MASTER_BYTE_TRANSMITTED)) return 1;
+
+    I2C_GenerateSTOP(I2C2, ENABLE);
+    return 0;
 }
 //IIC读一个字节 
 //reg:寄存器地址 
@@ -213,17 +223,31 @@ u8 MPU_Write_Byte(u8 reg,u8 data)
 u8 MPU_Read_Byte(u8 reg)
 {
 	u8 res;
-    MPU_IIC_Start(); 
-	MPU_IIC_Send_Byte((MPU_ADDR<<1)|0);//发送器件地址+写命令	
-	MPU_IIC_Wait_Ack();		//等待应答 
-    MPU_IIC_Send_Byte(reg);	//写寄存器地址
-    MPU_IIC_Wait_Ack();		//等待应答
-    MPU_IIC_Start();
-	MPU_IIC_Send_Byte((MPU_ADDR<<1)|1);//发送器件地址+读命令	
-    MPU_IIC_Wait_Ack();		//等待应答 
-	res=MPU_IIC_Read_Byte(0);//读取数据,发送nACK 
-    MPU_IIC_Stop();			//产生一个停止条件 
-	return res;		
+
+    I2C_GenerateSTART(I2C2, ENABLE);
+    MPU6050_WaitEvent(I2C_EVENT_MASTER_MODE_SELECT);
+
+    I2C_Send7bitAddress(I2C2, MPU6050_ADDRESS, I2C_Direction_Transmitter);
+    MPU6050_WaitEvent(I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED);
+
+    I2C_SendData(I2C2, reg);
+    MPU6050_WaitEvent(I2C_EVENT_MASTER_BYTE_TRANSMITTED);
+
+    I2C_GenerateSTART(I2C2, ENABLE);
+    MPU6050_WaitEvent(I2C_EVENT_MASTER_MODE_SELECT);
+
+    I2C_Send7bitAddress(I2C2, MPU6050_ADDRESS, I2C_Direction_Receiver);
+    MPU6050_WaitEvent(I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED);
+
+    I2C_AcknowledgeConfig(I2C2, DISABLE);
+    I2C_GenerateSTOP(I2C2, ENABLE);
+
+    MPU6050_WaitEvent(I2C_EVENT_MASTER_BYTE_RECEIVED);
+    res = I2C_ReceiveData(I2C2);
+
+    I2C_AcknowledgeConfig(I2C2, ENABLE);
+
+    return res;
 }
 
 
