@@ -40,12 +40,12 @@
 /* Global Variable */
 uint8_t RxData;
 uint8_t ID;
-volatile int32_t Motor1_is_there_speed = 1; // ��־λ��ָʾ�ٶ��Ƿ�Ϊ��
-volatile int32_t Motor2_is_there_speed = 1; // ��־λ��ָʾ�ٶ��Ƿ�Ϊ��
-volatile int32_t Motor1_lastCapture = 1; // ��־λ��ָʾ�Ƿ���²���
-volatile int32_t Motor2_lastCapture = 1; // ��־λ��ָʾ�Ƿ���²���
-float Vertical_Kp=-820,Vertical_Kd=3.5;                  //ֱ����KP��KD
-float Velocity_Kp=-58,Velocity_Ki=-0.25;                  //�ٶȻ�KP��KI
+volatile int32_t Motor1_is_there_speed = 1; // 标志位，指示速度是否为零
+volatile int32_t Motor2_is_there_speed = 1; // 标志位，指示速度是否为零
+volatile int32_t Motor1_lastCapture = 1; // 标志位，指示是否更新捕获
+volatile int32_t Motor2_lastCapture = 1; // 标志位，指示是否更新捕获
+float Vertical_Kp=450,Vertical_Kd=3;                  //直立环KP、KD 450
+float Velocity_Kp=0,Velocity_Ki=0;                  //速度环KP、KI
 //uint32_t TIM2_rpm = 0;
 //uint8_t TIM2_direction = 0;
 

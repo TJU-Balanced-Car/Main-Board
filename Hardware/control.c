@@ -26,13 +26,12 @@ void PID_Control(void)
     MPU_Get_Accelerometer(&aacx,&aacy,&aacz);   //角加速度
 
     Vertical_out=Vertical(Med_Angle,Roll,gyrox);//直立环
-    Velocity_out=Velocity(Encoder_Motor);	    //速度环
+//    Velocity_out=Velocity(Encoder_Motor);	    //速度环
 
     //2.把控制输出量加载到电机上，完成最终的的控制。
-    PWM1=Vertical_out;
-//            +Velocity_out;            //最终输出
+    PWM1=Vertical_out+Velocity_out;            //最终输出
     PWM_Limit(&PWM1);
-    printf("Angle:%f, Vertical_out:%d, PWM1:%d\n", Roll, Vertical_out, PWM1);
+    printf("Angle:%f, Kp:%f, Kd:%f, PWM1:%d\n", Roll, Vertical_Kp, Vertical_Kd, PWM1);
     Motor1_SetSpeed(PWM1);
     Motor_Stop(&Med_Angle, &Roll);
 }
