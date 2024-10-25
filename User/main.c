@@ -111,7 +111,7 @@ int main(void)
         mpu_dmp_get_data(&Pitch, &Roll, &Yaw);
         MPU_Get_Gyroscope(&gx, &gy, &gz);
         MPU_Get_Accelerometer(&ax, &ay, &az);
-	    printf("pitch:%f, roll:%f, yaw:%f, AX:%d, AY:%d, AZ:%d, GX:%d, GY:%d, GZ:%d\n", Pitch, Roll, Yaw, ax, ay, az, gx, gy, gz);
+	    printf("pitch:%f, roll:%f, yaw:%f, AX:%d, AY:%d, AZ:%d, GX:%d, GY:%d, GZ:%d\n", Pitch, Roll, Yaw, ax, ay, -az, gx, gy, gz);
 
 //	    if (Serial_GetRxFlag() == 1)
 //	    {
