@@ -141,9 +141,9 @@ void PWM_Limit(int *pwm)
 //  入口参数：   小车倾角
 //  返回参数：   无
 //==========================================================
-void Motor_Stop(float Angle)
+void Motor_Stop(float *Mid_Angle, float *Angle)
 {
-    if(Angle > 30 || Angle < -30)
+    if((*Mid_Angle - *Angle) > 15 || (*Mid_Angle - *Angle) < -15)
     {
         Motor1_SetSpeed(0);
         Motor2_SetSpeed(0);

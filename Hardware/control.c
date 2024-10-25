@@ -13,7 +13,7 @@ int PWM1;                                           //最终输出
 int Encoder_Motor;	                                //动量轮驱动电机编码器数据（速度）
 
 
-float Med_Angle=-2.5;	                                //机械中值---在这里修改你的机械中值即可。
+float Med_Angle=0.6;	                                //机械中值---在这里修改你的机械中值即可。
 extern float Vertical_Kp, Vertical_Kd, Velocity_Kp, Velocity_Ki;                 //速度环KP、KI
 
 
@@ -34,7 +34,7 @@ void PID_Control(void)
     PWM_Limit(&PWM1);
     printf("Angle:%f, Vertical_out:%d, PWM1:%d\n", Roll, Vertical_out, PWM1);
     Motor1_SetSpeed(PWM1);
-    Motor_Stop(Roll);
+    Motor_Stop(&Med_Angle, &Roll);
 }
 
 /*********************
