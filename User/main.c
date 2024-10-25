@@ -40,12 +40,6 @@
 /* Global Variable */
 uint8_t RxData;
 uint8_t ID;
-float Pitch, Roll, Yaw;
-short ax, ay, az, gx, gy, gz;
-uint8_t MPU_Get_Gyroscope(short *gx, short *gy, short *gz);
-uint8_t MPU_Get_Accelerometer(short *ax, short *ay, short *az);
-
-volatile uint16_t CNT, Num;
 volatile int32_t Motor1_is_there_speed = 1; // ��־λ��ָʾ�ٶ��Ƿ�Ϊ��
 volatile int32_t Motor2_is_there_speed = 1; // ��־λ��ָʾ�ٶ��Ƿ�Ϊ��
 volatile int32_t Motor1_lastCapture = 1; // ��־λ��ָʾ�Ƿ���²���
@@ -89,37 +83,16 @@ int main(void)
     Servo_SetAngle(90);
 	while(1)
     {
+        Delay_Ms(10);
 //	    printf("duty1: %d, dir1: %d, duty2: %d, dir2: %d\n", Motor1_GetFreq(), Motor1_GetDir(), Motor2_GetFreq(), Motor2_GetDir());
 	    Motor1_is_there_speed = (Motor1_lastCapture == TIM_GetCapture2(TIM1)) ? 0 : 1;
         Motor2_is_there_speed = (Motor2_lastCapture == TIM_GetCapture2(TIM2)) ? 0 : 1;
         Motor1_lastCapture = (TIM_GetCapture2(TIM1) != 0) ? TIM_GetCapture2(TIM1) : Motor1_lastCapture;
         Motor2_lastCapture = (TIM_GetCapture2(TIM2) != 0) ? TIM_GetCapture2(TIM2) : Motor2_lastCapture;
-
-	    //        Motor1_SetSpeed(70);
-//        Motor1_SetDir(1);
-//	    CNT = TIM_GetCounter(TIM5);
-//	    printf("CNT: %d", CNT);
-//        Delay_Ms(10);
-//        USART_SendData(USART2, '1');
-//	    USART2_SendString("dsahgbksfjvk");
-//	    Motor1_SetDir(1);
-//	    Test_LED_Off();
-//	    Delay_Ms(10);
-//	    Motor1_SetDir(0);
-//	    Test_LED_On();
-	    Delay_Ms(10);
-//        Motor2_SetSpeed(70);
-//        Motor2_SetDir(1);
-	    //Test_LED_Off();
-
         PID_Control();
 //	    printf("ID:%d, AX:%d, AY:%d, AZ:%d, GX:%d, GY:%d, GZ:%d\n", ID,
 //                MPU6050_Data.Accel_X_RAW, MPU6050_Data.Accel_Y_RAW, MPU6050_Data.Accel_Z_RAW,
 //                MPU6050_Data.Gyro_X_RAW, MPU6050_Data.Gyro_Y_RAW, MPU6050_Data.Gyro_Z_RAW);
-        mpu_dmp_get_data(&Pitch, &Roll, &Yaw);
-        MPU_Get_Gyroscope(&gx, &gy, &gz);
-        MPU_Get_Accelerometer(&ax, &ay, &az);
-	    printf("pitch:%f, roll:%f, yaw:%f, AX:%d, AY:%d, AZ:%d, GX:%d, GY:%d, GZ:%d\n", Pitch, Roll, Yaw, ax, ay, -az, gx, gy, gz);
 
 //	    if (Serial_GetRxFlag() == 1)
 //	    {

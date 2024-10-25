@@ -4,7 +4,6 @@
 #include "Motor.h"
 #include "MPU6050.h"
 
-MPU6050_t MPU6050_Data;
 float Pitch,Roll,Yaw;						        //角度
 short aacx,aacy,aacz;		                        //角加速度
 short gyrox,gyroy,gyroz;	                        //角速度
@@ -22,14 +21,9 @@ void PID_Control(void)
 {
     Encoder_Motor=Motor1_GetFreq();          //1.采集编码器数据&MPU6050角度信息。
 
-    MPU6050_Read_All(&MPU6050_Data);
-    Roll = MPU6050_Data.KalmanAngleX;
-    aacx = MPU6050_Data.Accel_X_RAW;
-    aacy = MPU6050_Data.Accel_Y_RAW;
-    aacz = MPU6050_Data.Accel_Z_RAW;
-    gyrox = MPU6050_Data.Gyro_X_RAW;
-    gyroy = MPU6050_Data.Gyro_Y_RAW;
-    gyroz = MPU6050_Data.Gyro_Z_RAW;
+    mpu_dmp_get_data(&Pitch,&Roll,&Yaw);        //角度
+    MPU_Get_Gyroscope(&gyrox,&gyroy,&gyroz);    //陀螺仪角速度
+    MPU_Get_Accelerometer(&aacx,&aacy,&aacz);   //角加速度
 
     Vertical_out=Vertical(Med_Angle,Roll,gyrox);//直立环
     Velocity_out=Velocity(Encoder_Motor);	    //速度环
