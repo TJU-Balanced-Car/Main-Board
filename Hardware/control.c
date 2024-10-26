@@ -13,8 +13,8 @@ int PWM1;                                           //最终输出
 int Encoder_Motor;	                                //动量轮驱动电机编码器数据（速度）
 
 
-float Med_Angle=0.6;	                                //机械中值---在这里修改你的机械中值即可。
-extern float Vertical_Kp, Vertical_Kd, Velocity_Kp, Velocity_Ki;                 //速度环KP、KI
+float Med_Angle=-1;	                                //机械中值---在这里修改你的机械中值即可。
+extern float Vertical_Kp, Vertical_Ki, Vertical_Kd, Velocity_Kp, Velocity_Ki;                 //速度环KP、KI
 
 
 void PID_Control(void)
@@ -31,7 +31,8 @@ void PID_Control(void)
     //2.把控制输出量加载到电机上，完成最终的的控制。
     PWM1=Vertical_out+Velocity_out;            //最终输出
     PWM_Limit(&PWM1);
-    printf("Angle:%f, Kp:%f, Kd:%f, PWM1:%d\n", Roll, Vertical_Kp, Vertical_Kd, PWM1);
+    printf("Angle:%f, Kp:%f, Kd:%f, Vertical_out:%d\n", Roll, Vertical_Kp, Vertical_Kd, Vertical_out);
+//    printf("Speed:%d, Kp:%f, Ki:%f, Velocity_out:%d, PWM:%d\n", Encoder_Motor, Velocity_Kp, Velocity_Ki, Velocity_out, PWM1);
     Motor1_SetSpeed(PWM1);
     Motor_Stop(&Med_Angle, &Roll);
 }
@@ -44,7 +45,11 @@ void PID_Control(void)
 int Vertical(float Med,float Angle,float gyro_x)
 {
 	int PWM_out1;
-	PWM_out1=Vertical_Kp*(Med-Angle)+Vertical_Kd*(gyro_x);
+	static float Vertical_Err;
+	Vertical_Err += (Med - Angle);
+	if (Vertical_Err > +30) Vertical_Err = +30;
+    if (Vertical_Err < -30) Vertical_Err = -30;
+	PWM_out1 = Vertical_Kp * (Med-Angle) + Vertical_Ki * Vertical_Err + Vertical_Kd * (gyro_x);
 	return PWM_out1;
 }
 

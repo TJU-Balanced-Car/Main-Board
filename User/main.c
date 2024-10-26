@@ -44,8 +44,8 @@ volatile int32_t Motor1_is_there_speed = 1; // 标志位，指示速度是否为
 volatile int32_t Motor2_is_there_speed = 1; // 标志位，指示速度是否为零
 volatile int32_t Motor1_lastCapture = 1; // 标志位，指示是否更新捕获
 volatile int32_t Motor2_lastCapture = 1; // 标志位，指示是否更新捕获
-float Vertical_Kp=450,Vertical_Kd=3;                  //直立环KP、KD 450
-float Velocity_Kp=0,Velocity_Ki=0;                  //速度环KP、KI
+float Vertical_Kp=220, Vertical_Ki=0, Vertical_Kd=0;                  //直立环KP、KD 670 2.3
+float Velocity_Kp=-1.6,Velocity_Ki=-0.0007;                  //速度环KP、KI-1.6 -0.007
 //uint32_t TIM2_rpm = 0;
 //uint8_t TIM2_direction = 0;
 

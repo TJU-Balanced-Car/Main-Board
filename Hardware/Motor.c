@@ -9,8 +9,8 @@
 #include "Buzzer.h"
 #include "Motor.h"
 
-#define  PWM_MAX    13000
-#define  PWM_MIN   -13000
+#define  PWM_MAX    6000
+#define  PWM_MIN   -6000
 
 //==========================================================
 //  函数名称：   Motor_Init
@@ -69,7 +69,7 @@ void Motor_Init(void)
 //==========================================================
 //  函数名称：   Motor1_SetSpeed
 //  函数功能：   设置电机1转速
-//  入口参数：   电机转速，取值0~100
+//  入口参数：   电机转速
 //  返回参数：   无
 //==========================================================
 void Motor1_SetSpeed(float Speed)
@@ -80,7 +80,7 @@ void Motor1_SetSpeed(float Speed)
         Motor1_SetDir(0);
         Speed = -Speed;
     }
-    TIM_SetCompare3(TIM3, Speed / 2); // 保持在0到100范围内
+    TIM_SetCompare3(TIM3, Speed); // 保持在0到100范围内
 }
 
 //==========================================================
@@ -101,12 +101,12 @@ void Motor1_SetDir(uint8_t Dir)
 //==========================================================
 //  函数名称：   Motor2_SetSpeed
 //  函数功能：   设置电机2转速
-//  入口参数：   电机转速，取值0~100
+//  入口参数：   电机转速
 //  返回参数：   无
 //==========================================================
 void Motor2_SetSpeed(float Speed)
 {
-    TIM_SetCompare1(TIM3, Speed / 2); // 电机转速为0~100
+    TIM_SetCompare1(TIM3, Speed); // 电机转速为0~100
 }
 
 //==========================================================
