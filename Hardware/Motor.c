@@ -154,3 +154,40 @@ void Motor_Stop(float *Mid_Angle, float *Angle)
     }
 }
 
+//==========================================================
+//  函数名称：   Speed_Pid_Ctrl
+//  函数功能：   速度闭环控制
+//  入口参数：   目标值，实际值
+//  返回参数：   占空比
+//==========================================================
+u16 Speed_Pid_Ctrl (int targetSpeed,int actualSpeed)
+{
+    float bias = 0;   // 目标值与实际值的差值
+    static float lastBias = 0;   // 上次偏差
+    static float lastLastBias = 0;   // 上上次偏差
+    static float pwmDuty = 0;   // PWM占空比
+
+    // 比例调节系数范围1.6
+    float kp = 1.6;   // 比例调节
+    float ki = 0;   // 积分调节
+    float kd = 0;   // 微分调节
+
+    printf ("target = %d actual = %d\r\n",targetSpeed,actualSpeed);
+
+    lastLastBias = lastBias;
+    lastBias = bias;
+
+    bias = (float)targetSpeed - (float)actualSpeed;
+
+    pwmDuty += kp * (bias - lastBias) + ki * bias + kd * (bias - 2 * lastBias + lastLastBias);
+
+    // 限幅
+    if (pwmDuty >= 999)
+    {
+        pwmDuty = 999;
+    }
+
+    return (u16)pwmDuty;
+}
+
+
