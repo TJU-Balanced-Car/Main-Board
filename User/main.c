@@ -51,7 +51,8 @@ int main(void)
     Buzzer_Stop();
     Test_LED_Init();
     Serial_Init();
-    Encoder_Init();
+    Motor_Encoder_Init();
+//    Encoder_Init();
     while (mpu_dmp_init()){printf("MPU Init Failed\n");};
     printf("MPU Init Succeed\n");
     Motor_Init();
