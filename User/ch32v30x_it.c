@@ -18,11 +18,18 @@ extern int32_t Motor1_is_there_speed; // 标志位，指示速度是否为零
 extern int32_t Motor2_is_there_speed; // 标志位，指示速度是否为零
 extern int32_t Motor1_lastCapture; // 标志位，指示是否更新捕获
 extern int32_t Motor2_lastCapture; // 标志位，指示是否更新捕获
+extern float Vertical_Kp, Vertical_Ki, Vertical_Kd, Velocity_Kp, Velocity_Ki;
 
 void NMI_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void HardFault_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void USART1_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void TIM5_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
+void EXTI0_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
+void EXTI1_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
+void EXTI2_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
+void EXTI3_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
+void EXTI4_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
+void EXTI9_5_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 
 /*********************************************************************
  * @fn      NMI_Handler
@@ -121,5 +128,66 @@ void TIM5_IRQHandler(void)
 
         // 平衡PID控制
         PID_Control();
+    }
+}
+
+// CCW2
+void EXTI0_IRQHandler(void)
+{
+    if (EXTI_GetITStatus(EXTI_Line0) == SET)
+    {
+        Vertical_Kd += 0.1;
+        EXTI_ClearITPendingBit(EXTI_Line0);
+    }
+}
+// CW2
+void EXTI2_IRQHandler(void)
+{
+    if (EXTI_GetITStatus(EXTI_Line2) == SET)
+    {
+        Vertical_Kd += -0.1;
+        EXTI_ClearITPendingBit(EXTI_Line2);
+    }
+}
+// PRESS2
+void EXTI1_IRQHandler(void)
+{
+    if (EXTI_GetITStatus(EXTI_Line1) == SET)
+    {
+        TIM_Cmd(TIM1, DISABLE);
+        EXTI_ClearITPendingBit(EXTI_Line1);
+    }
+}
+// PRESS1
+void EXTI3_IRQHandler(void)
+{
+    if (EXTI_GetITStatus(EXTI_Line3) == SET)
+    {
+        TIM_Cmd(TIM1, ENABLE);
+        EXTI_ClearITPendingBit(EXTI_Line3);
+    }
+}
+// CCW1
+void EXTI4_IRQHandler(void)
+{
+    if (EXTI_GetITStatus(EXTI_Line4) == SET)
+    {
+        if (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_5) == 0)
+        {
+            Vertical_Kp += -10;
+        }
+        EXTI_ClearITPendingBit(EXTI_Line4);
+    }
+}
+// CW1
+void EXTI9_5_IRQHandler(void)
+{
+    if (EXTI_GetITStatus(EXTI_Line5) == SET)
+    {
+        if (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_4) == 0)
+        {
+            Vertical_Kp += 10;
+        }
+        EXTI_ClearITPendingBit(EXTI_Line5);
     }
 }

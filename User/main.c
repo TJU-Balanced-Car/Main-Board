@@ -52,11 +52,10 @@ int main(void)
     Test_LED_Init();
     Serial_Init();
     Motor_Encoder_Init();
-//    Encoder_Init();
+    Encoder_Init();
     while (mpu_dmp_init()){printf("MPU Init Failed\n");};
     printf("MPU Init Succeed\n");
     Motor_Init();
-    Timer_IC_Init();
 
 	SystemCoreClockUpdate();
 	Delay_Init();
@@ -71,6 +70,7 @@ int main(void)
     Motor2_SetDir(1);
 
     Servo_SetAngle(90);
+    Timer_IC_Init();
 	while(1)
     {
 //        Delay_Ms(10);
