@@ -20,6 +20,20 @@
 #include "stdio.h"
 #include "ch32v30x.h"
 
+#include "Servo.h"
+#include "Buzzer.h"
+#include "Serial.h"
+#include "MPU6050.h"
+#include "inv_mpu.h"
+#include "inv_mpu_dmp_motion_driver.h"
+#include "mpuiic.h"
+#include "TestLED.h"
+#include "Encoder.h"
+#include "Motor.h"
+#include "control.h"
+#include "sys.h"
+#include "Timer.h"
+
 /* UART Printf Definition */
 #define DEBUG_UART1    1
 #define DEBUG_UART2    2

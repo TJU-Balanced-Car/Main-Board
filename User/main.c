@@ -19,18 +19,6 @@
 */
 
 #include <debug.h>
-#include "Servo.h"
-#include "Buzzer.h"
-#include "Serial.h"
-#include "MPU6050.h"
-#include "inv_mpu.h"
-#include "inv_mpu_dmp_motion_driver.h"
-#include "mpuiic.h"
-#include "TestLED.h"
-#include "Encoder.h"
-#include "Motor.h"
-#include "control.h"
-#include "sys.h"
 
 
 /* Global typedef */
@@ -67,6 +55,7 @@ int main(void)
     while (mpu_dmp_init()){printf("MPU Init Failed\n");};
     printf("MPU Init Succeed\n");
     Motor_Init();
+    Timer_IC_Init();
 
 	SystemCoreClockUpdate();
 	Delay_Init();
@@ -83,13 +72,9 @@ int main(void)
     Servo_SetAngle(90);
 	while(1)
     {
-        Delay_Ms(10);
+//        Delay_Ms(10);
 //	    printf("duty1: %d, dir1: %d, duty2: %d, dir2: %d\n", Motor1_GetFreq(), Motor1_GetDir(), Motor2_GetFreq(), Motor2_GetDir());
-	    Motor1_is_there_speed = (Motor1_lastCapture == TIM_GetCapture2(TIM1)) ? 0 : 1;
-        Motor2_is_there_speed = (Motor2_lastCapture == TIM_GetCapture2(TIM2)) ? 0 : 1;
-        Motor1_lastCapture = (TIM_GetCapture2(TIM1) != 0) ? TIM_GetCapture2(TIM1) : Motor1_lastCapture;
-        Motor2_lastCapture = (TIM_GetCapture2(TIM2) != 0) ? TIM_GetCapture2(TIM2) : Motor2_lastCapture;
-        PID_Control();
+
 //	    printf("ID:%d, AX:%d, AY:%d, AZ:%d, GX:%d, GY:%d, GZ:%d\n", ID,
 //                MPU6050_Data.Accel_X_RAW, MPU6050_Data.Accel_Y_RAW, MPU6050_Data.Accel_Z_RAW,
 //                MPU6050_Data.Gyro_X_RAW, MPU6050_Data.Gyro_Y_RAW, MPU6050_Data.Gyro_Z_RAW);
