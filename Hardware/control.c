@@ -15,6 +15,7 @@ int Encoder_Motor;	                                //¶¯Á¿ÂÖÇı¶¯µç»ú±àÂëÆ÷Êı¾İ£¨Ë
 
 float Med_Angle=-1;	                                //»úĞµÖĞÖµ---ÔÚÕâÀïĞŞ¸ÄÄãµÄ»úĞµÖĞÖµ¼´¿É¡£
 extern float Vertical_Kp, Vertical_Ki, Vertical_Kd, Velocity_Kp, Velocity_Ki;                 //ËÙ¶È»·KP¡¢KI
+extern DataPacket packet;
 
 
 void PID_Control(void)
@@ -31,10 +32,18 @@ void PID_Control(void)
     //2.°Ñ¿ØÖÆÊä³öÁ¿¼ÓÔØµ½µç»úÉÏ£¬Íê³É×îÖÕµÄµÄ¿ØÖÆ¡£
     PWM1=Vertical_out+Velocity_out;            //×îÖÕÊä³ö
     PWM_Limit(&PWM1);
-    printf("Angle:%f, Kp:%f, Kd:%f, Vertical_out:%d\n", Roll, Vertical_Kp, Vertical_Kd, Vertical_out);
+//    printf("Angle:%f, Kp:%f, Kd:%f, Vertical_out:%d\n", Roll, Vertical_Kp, Vertical_Kd, Vertical_out);
 //    printf("Speed:%d, Kp:%f, Ki:%f, Velocity_out:%d, PWM:%d\n", Encoder_Motor, Velocity_Kp, Velocity_Ki, Velocity_out, PWM1);
     Motor1_SetSpeed(PWM1);
     Motor_Stop(&Med_Angle, &Roll);
+    packet.Roll = Roll;
+    packet.VerticalKp = Vertical_Kp;
+    packet.VerticalKi = Vertical_Ki;
+    packet.VerticalKd = Vertical_Kd;
+    packet.VerticalOut = Vertical_out;
+    packet.VelocityKp = Velocity_Kp;
+    packet.VelocityKi = Velocity_Ki;
+    packet.VelocityOut = Velocity_out;
 }
 
 /*********************

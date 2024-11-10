@@ -10,6 +10,20 @@
 
 #include <stdio.h>
 
+typedef struct {
+    float Roll;
+    int Motor1Speed;
+    int Motor2Speed;
+    int ServoAngle;
+    float VerticalKp;
+    float VerticalKi;
+    float VerticalKd;
+    int VerticalOut;
+    float VelocityKp;
+    float VelocityKi;
+    int VelocityOut;
+} DataPacket;
+
 extern char Serial_RxPacket[];
 
 void Serial_Init(void);
@@ -19,6 +33,7 @@ void USART1_SendString(char *String);
 void USART1_SendNumber(uint32_t Number);
 //void USART1_Printf(char *format, ...);
 uint8_t Serial_GetRxFlag(void);
+void USART_SendDataPacket(USART_TypeDef* USARTx, DataPacket* packet);
 
 
 #endif /* HARDWARE_SERIAL_H_ */

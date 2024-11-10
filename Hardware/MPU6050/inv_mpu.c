@@ -2870,7 +2870,7 @@ lp_int_restore:
 
 //陀螺仪方向设置
 static signed char gyro_orientation[9] = { 1, 0, 0,
-                                           0, 1, 0,
+                                           0, -1, 0,
                                            0, 0, -1};
 //MPU6050自测试
 //返回值:0,正常

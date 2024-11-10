@@ -188,3 +188,19 @@ uint8_t Serial_GetRxFlag(void)
     }
     return 0;
 }
+
+//==========================================================
+//  函数名称：   USART_SendDataPacket
+//  函数功能：   发送数据包
+//  入口参数：   使用串口，数据包
+//  返回参数：   无
+//==========================================================
+void USART_SendDataPacket(USART_TypeDef* USARTx, DataPacket* packet) {
+    uint8_t* data = (uint8_t*)packet;  // 将数据包转换为字节流
+    for (int i = 0; i < sizeof(DataPacket); ++i) {
+        // 等待发送缓冲区为空
+        while (USART_GetFlagStatus(USARTx, USART_FLAG_TXE) == RESET);
+        // 发送一个字节
+        USART_SendData(USARTx, data[i]);
+    }
+}

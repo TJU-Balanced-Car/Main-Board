@@ -32,10 +32,24 @@ volatile int32_t Motor1_is_there_speed = 1; // 标志位，指示速度是否为
 volatile int32_t Motor2_is_there_speed = 1; // 标志位，指示速度是否为零
 volatile int32_t Motor1_lastCapture = 1; // 标志位，指示是否更新捕获
 volatile int32_t Motor2_lastCapture = 1; // 标志位，指示是否更新捕获
+volatile int Servo_Angle = 0;
 float Vertical_Kp=670, Vertical_Ki=0, Vertical_Kd=2.3;                  //直立环KP、KD 670 2.3
 float Velocity_Kp=-1.6,Velocity_Ki=-0.0007;                  //速度环KP、KI-1.6 -0.007
 //uint32_t TIM2_rpm = 0;
 //uint8_t TIM2_direction = 0;
+DataPacket packet = {
+    .Roll = 1.23f,
+    .Motor1Speed = 100,
+    .Motor2Speed = 200,
+    .ServoAngle = 45,
+    .VerticalKp = 1.0f,
+    .VerticalKi = 0.5f,
+    .VerticalKd = 0.2f,
+    .VerticalOut = 10,
+    .VelocityKp = 1.5f,
+    .VelocityKi = 0.7f,
+    .VelocityOut = 20
+};
 
 /*********************************************************************
  * @fn      main
@@ -69,11 +83,12 @@ int main(void)
     Motor2_SetSpeed(0);
     Motor2_SetDir(1);
 
-    Servo_SetAngle(90);
+    Servo_SetAngle(Servo_Angle);
     Timer_IC_Init();
 	while(1)
     {
-//        Delay_Ms(10);
+        Delay_Ms(10);
+        printf("R:123M1:123\n");
 //	    printf("duty1: %d, dir1: %d, duty2: %d, dir2: %d\n", Motor1_GetFreq(), Motor1_GetDir(), Motor2_GetFreq(), Motor2_GetDir());
 
 //	    printf("ID:%d, AX:%d, AY:%d, AZ:%d, GX:%d, GY:%d, GZ:%d\n", ID,

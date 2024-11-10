@@ -18,7 +18,9 @@ extern int32_t Motor1_is_there_speed; // 标志位，指示速度是否为零
 extern int32_t Motor2_is_there_speed; // 标志位，指示速度是否为零
 extern int32_t Motor1_lastCapture; // 标志位，指示是否更新捕获
 extern int32_t Motor2_lastCapture; // 标志位，指示是否更新捕获
+extern int Servo_Angle;
 extern float Vertical_Kp, Vertical_Ki, Vertical_Kd, Velocity_Kp, Velocity_Ki;
+extern DataPacket packet;
 
 void NMI_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void HardFault_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
@@ -128,6 +130,13 @@ void TIM5_IRQHandler(void)
 
         // 平衡PID控制
         PID_Control();
+        packet.Motor1Speed = Motor1_GetFreq();
+        packet.Motor2Speed = Motor2_GetFreq();
+        packet.ServoAngle = Servo_Angle;
+        printf("R:%f,M1:%d,M2:%d,S:%d,Lp:%f,Li:%f,Ld:%f,Lo:%d,Yp:%f,Yi:%f,Yo:%d\n",
+                packet.Roll, packet.Motor1Speed, packet.Motor2Speed, packet.ServoAngle,
+                packet.VerticalKp, packet.VerticalKi, packet.VerticalKd, packet.VerticalOut,
+                packet.VelocityKp, packet.VelocityKi, packet.VelocityOut);
     }
 }
 
