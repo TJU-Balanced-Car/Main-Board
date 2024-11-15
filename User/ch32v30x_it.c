@@ -163,7 +163,7 @@ void EXTI1_IRQHandler(void)
 {
     if (EXTI_GetITStatus(EXTI_Line1) == SET)
     {
-        TIM_Cmd(TIM1, DISABLE);
+//        TIM_Cmd(TIM1, DISABLE);
         EXTI_ClearITPendingBit(EXTI_Line1);
     }
 }
@@ -172,7 +172,8 @@ void EXTI3_IRQHandler(void)
 {
     if (EXTI_GetITStatus(EXTI_Line3) == SET)
     {
-        TIM_Cmd(TIM1, ENABLE);
+        Vertical_Kd += -0.1;
+//        TIM_Cmd(TIM1, ENABLE);
         EXTI_ClearITPendingBit(EXTI_Line3);
     }
 }
@@ -183,7 +184,7 @@ void EXTI4_IRQHandler(void)
     {
         if (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_5) == 0)
         {
-            Vertical_Kp += -10;
+            Vertical_Kp += -5;
         }
         EXTI_ClearITPendingBit(EXTI_Line4);
     }
@@ -195,7 +196,7 @@ void EXTI9_5_IRQHandler(void)
     {
         if (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_4) == 0)
         {
-            Vertical_Kp += 10;
+            Vertical_Kp += 5;
         }
         EXTI_ClearITPendingBit(EXTI_Line5);
     }

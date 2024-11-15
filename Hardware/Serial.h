@@ -27,11 +27,11 @@ typedef struct {
 extern char Serial_RxPacket[];
 
 void Serial_Init(void);
-void USART1_SendByte(uint8_t Byte);
-void USART1_SendArray(uint8_t *Array);
-void USART1_SendString(char *String);
-void USART1_SendNumber(uint32_t Number);
-//void USART1_Printf(char *format, ...);
+void USART2_SendByte(uint8_t Byte);
+void USART2_SendArray(uint8_t *Array);
+void USART2_SendString(char *String);
+void USART2_SendNumber(uint32_t Number);
+//void USART2_Printf(char *format, ...);
 uint8_t Serial_GetRxFlag(void);
 void USART_SendDataPacket(USART_TypeDef* USARTx, DataPacket* packet);
 
