@@ -14,59 +14,42 @@ extern pid_param_t vel_pid;   // 速度环
 extern pid_param_t angle_pid; // 角度环
 extern pid_param_t acc_pid;   // 角速度环
 
+
 float Med_Angle=-0.4;	                                //机械中值---在这里修改你的机械中值即可。
 extern DataPacket packet;
 
-void PidInit(pid_param_t * pid)
-{
-  pid->kp        = 0;
-  pid->ki        = 0;
-  pid->kd        = 0;
-  pid->imax      = 0;
-  pid->out_p     = 0;
-  pid->out_i     = 0;
-  pid->out_d     = 0;
-  pid->out       = 0;
-  pid->integrator= 0;
-  pid->last_error= 0;
-  pid->last_derivative   = 0;
-  pid->last_t    = 0;
-}
-
+//==========================================================
+//  函数名称：   PID_Control
+//  函数功能：  PID控制函数
+//  入口参数：   无
+//  返回参数：   无
+//==========================================================
 void PID_Control(void)
 {
-    PWM1=Cascade_Pid_Control(Med_Angle);            //最终输出
+    PWM1=Cascade_Pid_Control(Med_Angle);
     PWM_Limit(&PWM1);
-//    printf("Angle:%f, Kp:%f, Kd:%f, Vertical_out:%d\n", Roll, Vertical_Kp, Vertical_Kd, Vertical_out);
-//    printf("Speed:%d, Kp:%f, Ki:%f, Velocity_out:%d, PWM:%d\n", Encoder_Motor, Velocity_Kp, Velocity_Ki, Velocity_out, PWM1);
     Motor1_SetSpeed(PWM1);
     Motor_Stop(&Med_Angle, &Roll);
     packet.Roll = Roll;
 }
 
-/*LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
-@函数名称：float constrain_float(float amt, float low, float high)
-@功能说明：限幅函数
-@参数说明：amt：参数 low：最低值 high：最高值
-@函数返回：无
-@修改时间：2022/03/15
-@调用方法：constrain_float(pid->integrator, -pid->imax, pid->imax);
-@备    注：
-QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ*/
+//==========================================================
+//  函数名称：   constrain_float
+//  函数功能：   限幅函数
+//  入口参数：   amt：参数     low：最低值     high：最高值
+//  返回参数：   无
+//==========================================================
 float constrain_float(float amt, float low, float high)
 {
   return ((amt)<(low)?(low):((amt)>(high)?(high):(amt)));
 }
 
-/*LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
-@函数名称：float constrain_float(float amt, float low, float high)
-@功能说明：pid位置式控制器输出
-@参数说明：pid     pid参数  error   pid输入误差
-@函数返回：PID输出结果
-@修改时间：2022/03/15
-@调用方法：
-@备    注：
-QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ*/
+//==========================================================
+//  函数名称：   PidLocCtrl
+//  函数功能：   pid位置式控制器输出
+//  入口参数：   pid: pid参数                  error: pid输入误差
+//  返回参数：   PID输出结果
+//==========================================================
 float PidLocCtrl(pid_param_t * pid, float error)
 {
   /* 累积误差 */
@@ -87,6 +70,12 @@ float PidLocCtrl(pid_param_t * pid, float error)
   return pid->out;
 }
 
+//==========================================================
+//  函数名称：   Cascade_Pid_Control
+//  函数功能：   串级控制函数
+//  入口参数：   机械中值
+//  返回参数：   角速度环输出
+//==========================================================
 float Cascade_Pid_Control(float Med_Angle)
 {
     static int16_t Pid_t;
