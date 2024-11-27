@@ -23,7 +23,7 @@ void MPU_IIC_Init(void)
     I2C_InitTypeDef I2C_InitStructure;
     I2C_StructInit(&I2C_InitStructure);
     I2C_InitStructure.I2C_Mode = I2C_Mode_I2C;
-    I2C_InitStructure.I2C_ClockSpeed = 50000; // 时钟频率，应小于400k
+    I2C_InitStructure.I2C_ClockSpeed = 400000; // 时钟频率，应小于400k
     I2C_InitStructure.I2C_DutyCycle = I2C_DutyCycle_2;
     I2C_InitStructure.I2C_Ack = I2C_Ack_Enable;
     I2C_InitStructure.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;

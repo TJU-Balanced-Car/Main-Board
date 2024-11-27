@@ -33,8 +33,9 @@ volatile int32_t Motor2_is_there_speed = 1; // 标志位，指示速度是否为
 volatile int32_t Motor1_lastCapture = 1; // 标志位，指示是否更新捕获
 volatile int32_t Motor2_lastCapture = 1; // 标志位，指示是否更新捕获
 volatile int Servo_Angle = 0;
-float Vertical_Kp=670, Vertical_Ki=0, Vertical_Kd=2.3;                  //直立环KP、KD 670 2.3
-float Velocity_Kp=-1.6,Velocity_Ki=-0.0007;                  //速度环KP、KI-1.6 -0.007
+float Vertical_Kp=315, Vertical_Ki=35, Vertical_Kd=-1.17;               //直立环KP、KD 675 52 -1.35
+//float Vertical_Kp=425, Vertical_Ki=35, Vertical_Kd=-1.22;
+float Velocity_Kp=-0, Velocity_Ki=-0.00;                               //速度环KP、KI-1.6 -0.007
 //uint32_t TIM2_rpm = 0;
 //uint8_t TIM2_direction = 0;
 DataPacket packet = {
@@ -64,7 +65,8 @@ int main(void)
     Buzzer_Init();
     Buzzer_Stop();
     Test_LED_Init();
-    Serial_Init();
+//    while (USART1_Init());
+    Serial_Init(115200);
     Motor_Encoder_Init();
     Encoder_Init();
     while (mpu_dmp_init()){printf("MPU Init Failed\n");};
@@ -80,15 +82,18 @@ int main(void)
 
 	Motor1_SetSpeed(0);
     Motor1_SetDir(1);
-    Motor2_SetSpeed(0);
+    Motor2_SetSpeed(10);
     Motor2_SetDir(1);
 
     Servo_SetAngle(Servo_Angle);
     Timer_IC_Init();
 	while(1)
     {
-        Delay_Ms(10);
-        printf("R:123M1:123\n");
+        Delay_Ms(300);
+        printf("R:%f,M1:%d,M2:%d,S:%d,Lp:%f,Li:%f,Ld:%f,Lo:%d,Yp:%f,Yi:%f,Yo:%d\n",
+                packet.Roll, packet.Motor1Speed, packet.Motor2Speed, packet.ServoAngle,
+                packet.VerticalKp, packet.VerticalKi, packet.VerticalKd, packet.VerticalOut,
+                packet.VelocityKp, packet.VelocityKi, packet.VelocityOut);
 //	    printf("duty1: %d, dir1: %d, duty2: %d, dir2: %d\n", Motor1_GetFreq(), Motor1_GetDir(), Motor2_GetFreq(), Motor2_GetDir());
 
 //	    printf("ID:%d, AX:%d, AY:%d, AZ:%d, GX:%d, GY:%d, GZ:%d\n", ID,

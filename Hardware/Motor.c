@@ -202,7 +202,7 @@ void PWM_Limit(int *pwm)
 //==========================================================
 void Motor_Stop(float *Mid_Angle, float *Angle)
 {
-    if((*Mid_Angle - *Angle) > 50 || (*Mid_Angle - *Angle) < -50)
+    if((*Mid_Angle - *Angle) > 40 || (*Mid_Angle - *Angle) < -40)
     {
         Motor1_SetSpeed(0);
         Motor2_SetSpeed(0);
