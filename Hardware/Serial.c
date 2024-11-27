@@ -18,7 +18,7 @@ uint8_t Serial_RxFlag;
 //  入口参数：   无
 //  返回参数：   无
 //==========================================================
-void Serial_Init(void)
+void Serial_Init(int BaudRate)
 {
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOD, ENABLE);
@@ -44,7 +44,7 @@ void Serial_Init(void)
 
     USART_InitTypeDef USART_InitStructure;
     USART_StructInit(&USART_InitStructure);
-    USART_InitStructure.USART_BaudRate = 9600; // 波特率
+    USART_InitStructure.USART_BaudRate = BaudRate; // 波特率
     USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;// 硬件流控制，不使用流控
     USART_InitStructure.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
     USART_InitStructure.USART_Parity = USART_Parity_No; // 无校验位
@@ -63,6 +63,20 @@ void Serial_Init(void)
     NVIC_Init(&NVIC_InitStructure);
 
     USART_Cmd(USART2, ENABLE);
+}
+
+//==========================================================
+//  函数名称：   USART1_Init
+//  函数功能：   串口初始化，包括蓝牙
+//  入口参数：   无
+//  返回参数：   成功为0
+//==========================================================
+uint8_t USART1_Init(void)
+{
+    Serial_Init(9600);
+    Send_AT_Command("AT+BAUD8\r\n");
+    Serial_Init(115200);
+    return 0;
 }
 
 //==========================================================
@@ -203,5 +217,39 @@ void USART_SendDataPacket(USART_TypeDef* USARTx, DataPacket* packet) {
         while (USART_GetFlagStatus(USARTx, USART_FLAG_TXE) == RESET);
         // 发送一个字节
         USART_SendData(USARTx, data[i]);
+    }
+}
+
+//==========================================================
+//  函数名称：   Wait_BLE_Response
+//  函数功能：   等待蓝牙响应AT指令
+//  入口参数：   使用的串口
+//  返回参数：   无
+//==========================================================
+void Wait_BLE_Response(USART_TypeDef* USARTx) {
+    char buffer[100];
+    int i = 0;
+    while (1) {
+        if (USART_GetFlagStatus(USARTx, USART_FLAG_RXNE) != RESET) {
+            char ch = USART_ReceiveData(USARTx);
+            buffer[i++] = ch;
+            if (ch == '\n') {  // 如果蓝牙模块返回的结束符为 '\n'?
+                buffer[i] = '\0';
+                break;
+            }
+        }
+    }
+}
+
+//==========================================================
+//  函数名称：   Send_AT_Command
+//  函数功能：   发送AT指令
+//  入口参数：   指令内容
+//  返回参数：   无
+//==========================================================
+void Send_AT_Command(const char *cmd) {
+    while (*cmd) {
+        USART_SendData(USART1, *cmd++);
+        while (USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET);
     }
 }

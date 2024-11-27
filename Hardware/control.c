@@ -13,7 +13,7 @@ int PWM1;                                           //最终输出
 int Encoder_Motor;	                                //动量轮驱动电机编码器数据（速度）
 
 
-float Med_Angle=-1;	                                //机械中值---在这里修改你的机械中值即可。
+float Med_Angle=-0.4;	                                //机械中值---在这里修改你的机械中值即可。
 extern float Vertical_Kp, Vertical_Ki, Vertical_Kd, Velocity_Kp, Velocity_Ki;                 //速度环KP、KI
 extern DataPacket packet;
 
@@ -27,7 +27,7 @@ void PID_Control(void)
     MPU_Get_Accelerometer(&aacx,&aacy,&aacz);   //角加速度
 
     Vertical_out=Vertical(Med_Angle,Roll,gyrox);//直立环
-//    Velocity_out=Velocity(Encoder_Motor);	    //速度环
+    Velocity_out=Velocity(Encoder_Motor);	    //速度环
 
     //2.把控制输出量加载到电机上，完成最终的的控制。
     PWM1=Vertical_out+Velocity_out;            //最终输出

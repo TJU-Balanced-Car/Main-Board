@@ -133,10 +133,7 @@ void TIM5_IRQHandler(void)
         packet.Motor1Speed = Motor1_GetFreq();
         packet.Motor2Speed = Motor2_GetFreq();
         packet.ServoAngle = Servo_Angle;
-        printf("R:%f,M1:%d,M2:%d,S:%d,Lp:%f,Li:%f,Ld:%f,Lo:%d,Yp:%f,Yi:%f,Yo:%d\n",
-                packet.Roll, packet.Motor1Speed, packet.Motor2Speed, packet.ServoAngle,
-                packet.VerticalKp, packet.VerticalKi, packet.VerticalKd, packet.VerticalOut,
-                packet.VelocityKp, packet.VelocityKi, packet.VelocityOut);
+
     }
 }
 
@@ -145,7 +142,9 @@ void EXTI0_IRQHandler(void)
 {
     if (EXTI_GetITStatus(EXTI_Line0) == SET)
     {
-        Vertical_Kd += 0.1;
+//        Vertical_Kd += 0.01;
+        Velocity_Kp += 0.01; Velocity_Ki = Velocity_Kp / 200;
+//        Velocity_Ki += 1.0;
         EXTI_ClearITPendingBit(EXTI_Line0);
     }
 }
@@ -154,7 +153,9 @@ void EXTI2_IRQHandler(void)
 {
     if (EXTI_GetITStatus(EXTI_Line2) == SET)
     {
-        Vertical_Kd += -0.1;
+//        Vertical_Kd += -0.01;
+        Velocity_Kp += -0.01; Velocity_Ki = Velocity_Kp / 200;
+//        Velocity_Ki += 1.0;
         EXTI_ClearITPendingBit(EXTI_Line2);
     }
 }
@@ -164,6 +165,7 @@ void EXTI1_IRQHandler(void)
     if (EXTI_GetITStatus(EXTI_Line1) == SET)
     {
 //        TIM_Cmd(TIM1, DISABLE);
+        Vertical_Kd += 0.01;
         EXTI_ClearITPendingBit(EXTI_Line1);
     }
 }
@@ -172,7 +174,8 @@ void EXTI3_IRQHandler(void)
 {
     if (EXTI_GetITStatus(EXTI_Line3) == SET)
     {
-        Vertical_Kd += -0.1;
+        Vertical_Kd += -0.01;
+//        Velocity_Ki += -1.0;
 //        TIM_Cmd(TIM1, ENABLE);
         EXTI_ClearITPendingBit(EXTI_Line3);
     }
@@ -184,6 +187,7 @@ void EXTI4_IRQHandler(void)
     {
         if (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_5) == 0)
         {
+//            Vertical_Ki += 0.5;
             Vertical_Kp += -5;
         }
         EXTI_ClearITPendingBit(EXTI_Line4);
@@ -196,6 +200,7 @@ void EXTI9_5_IRQHandler(void)
     {
         if (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_4) == 0)
         {
+//            Vertical_Ki += -0.5;
             Vertical_Kp += 5;
         }
         EXTI_ClearITPendingBit(EXTI_Line5);

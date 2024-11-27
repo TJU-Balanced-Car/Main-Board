@@ -71,5 +71,5 @@ void Servo_PWM_SetCompare(uint16_t Compare)
 //==========================================================
 void Servo_SetAngle(float Angle)
 {
-    Servo_PWM_SetCompare((Angle + 17) / 180 * 20 + 5); // 舵机角度为0~180度
+    Servo_PWM_SetCompare((Angle +  110) / 180 * 20 + 5); // 舵机角度为0~180度
 }
