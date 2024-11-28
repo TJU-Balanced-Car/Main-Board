@@ -20,7 +20,7 @@ typedef struct
 }pid_param_t;
 
 void PID_Control(void);
-float constrain_float(float amt, float low, float high);
+float constrain_float(float value, float min, float max);
 float PidLocCtrl(pid_param_t * pid, float error);
 float Cascade_Pid_Control(float Med_Angle);
 #endif

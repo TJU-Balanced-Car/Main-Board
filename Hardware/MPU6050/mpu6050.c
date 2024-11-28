@@ -99,7 +99,7 @@ u8 MPU_Get_Gyroscope(short *gx,short *gy,short *gz)
 	if(res==0)
 	{
 		*gx=((u16)buf[0]<<8)|buf[1];  
-		*gy=((u16)buf[2]<<8)|buf[3];  
+		*gy=(((u16)buf[2]<<8)|buf[3])+12;
 		*gz=((u16)buf[4]<<8)|buf[5];
 	} 	
     return res;;

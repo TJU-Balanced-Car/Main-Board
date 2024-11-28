@@ -146,7 +146,8 @@ void EXTI0_IRQHandler(void)
 {
     if (EXTI_GetITStatus(EXTI_Line0) == SET)
     {
-        angle_pid.ki += 5;
+        acc_pid.ki += 0.01;
+//        angle_pid.ki += 5;
         EXTI_ClearITPendingBit(EXTI_Line0);
     }
 }
@@ -155,7 +156,8 @@ void EXTI2_IRQHandler(void)
 {
     if (EXTI_GetITStatus(EXTI_Line2) == SET)
     {
-        angle_pid.ki -= 5;
+        acc_pid.ki -= 0.01;
+//        angle_pid.ki -= 5;
         EXTI_ClearITPendingBit(EXTI_Line2);
     }
 }
@@ -165,7 +167,8 @@ void EXTI1_IRQHandler(void)
     if (EXTI_GetITStatus(EXTI_Line1) == SET)
     {
 //        TIM_Cmd(TIM1, DISABLE);
-        angle_pid.kd += 0.1;
+        acc_pid.kd += 0.1;
+//        angle_pid.kd += 0.1;
         EXTI_ClearITPendingBit(EXTI_Line1);
     }
 }
@@ -175,7 +178,8 @@ void EXTI3_IRQHandler(void)
     if (EXTI_GetITStatus(EXTI_Line3) == SET)
     {
 //        TIM_Cmd(TIM1, ENABLE);
-        angle_pid.kd -= 0.1;
+        acc_pid.kd -= 0.1;
+//        angle_pid.kd -= 0.1;
         EXTI_ClearITPendingBit(EXTI_Line3);
     }
 }
@@ -186,7 +190,8 @@ void EXTI4_IRQHandler(void)
     {
         if (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_5) == 0)
         {
-            angle_pid.kp -= 5;
+            acc_pid.kp -= 5;
+//            angle_pid.kp -= 5;
         }
         EXTI_ClearITPendingBit(EXTI_Line4);
     }
@@ -198,7 +203,8 @@ void EXTI9_5_IRQHandler(void)
     {
         if (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_4) == 0)
         {
-            angle_pid.kp += 5;
+            acc_pid.kp += 5;
+//            angle_pid.kp += 5;
         }
         EXTI_ClearITPendingBit(EXTI_Line5);
     }

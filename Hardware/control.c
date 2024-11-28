@@ -36,12 +36,13 @@ void PID_Control(void)
 //==========================================================
 //  函数名称：   constrain_float
 //  函数功能：   限幅函数
-//  入口参数：   amt：参数     low：最低值     high：最高值
+//  入口参数：   value：参数     min：最低值     max：最高值
 //  返回参数：   无
 //==========================================================
-float constrain_float(float amt, float low, float high)
-{
-  return ((amt)<(low)?(low):((amt)>(high)?(high):(amt)));
+float constrain_float(float value, float min, float max) {
+    if (value > max) return max;
+    if (value < min) return min;
+    return value;
 }
 
 //==========================================================
@@ -52,22 +53,18 @@ float constrain_float(float amt, float low, float high)
 //==========================================================
 float PidLocCtrl(pid_param_t * pid, float error)
 {
-  /* 累积误差 */
-  pid->integrator += error;
-
-  /* 误差限幅 */
-  pid->integrator = constrain_float(pid->integrator, -pid->imax, pid->imax);
-
-
-  pid->out_p = pid->kp * error;
-  pid->out_i = pid->ki * pid->integrator;
-  pid->out_d = pid->kd * (error - pid->last_error);
-
-  pid->last_error = error;
-
-  pid->out = pid->out_p + pid->out_i + pid->out_d;
-
-  return pid->out;
+    // 累积误差（积分项）
+    pid->integrator += error;
+    // 积分限幅
+    pid->integrator = constrain_float(pid->integrator, -pid->imax, pid->imax);
+    // 计算PID各项
+    pid->out_p = pid->kp * error;
+    pid->out_i = pid->ki * pid->integrator;
+    pid->out_d = pid->kd * (error - pid->last_error);
+    pid->last_error = error;
+    // 计算最终输出
+    pid->out = pid->out_p + pid->out_i + pid->out_d;
+    return pid->out;
 }
 
 //==========================================================
@@ -82,17 +79,18 @@ float Cascade_Pid_Control(float Med_Angle)
     Pid_t += 2;
     mpu_dmp_get_data(&Pitch,&Roll,&Yaw);        //角度
     MPU_Get_Gyroscope(&gyrox,&gyroy,&gyroz);    //陀螺仪角速度
-    if (Pid_t % 100 == 0)                       // 速度环
+    if (Pid_t % 20 == 0)                       // 角度环
     {
         Pid_t = 0;
-        ECPULSE1 = Motor1_GetFreq();
-        PidLocCtrl(&vel_pid, 0-ECPULSE1);
+//        PidLocCtrl(&angle_pid, Med_Angle - Roll);
     }
-    if(Pid_t % 10 == 0)                         // 角度环
+    if(Pid_t % 10 == 0)                         // 角速度环
     {
-        PidLocCtrl(&angle_pid, vel_pid.out - Pitch + Med_Angle);
+        PidLocCtrl(&acc_pid, angle_pid.out - gyroy);
+        printf(gyroy);
     }
-    PidLocCtrl(&acc_pid, -gyrox + angle_pid.out); // 角速度环
+//    PidLocCtrl(&vel_pid, acc_pid.out - Motor1_GetFreq()); // 速度环
 
-    return acc_pid.out;
+//    return vel_pid.out;
+return acc_pid.out;
 }
