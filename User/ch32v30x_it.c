@@ -12,6 +12,8 @@
 #include "ch32v30x_it.h"
 #include "debug.h"
 
+#define ENCODER_PID vel_pid
+
 extern char Serial_RxPacket[100];
 extern uint8_t Serial_RxFlag;
 extern int32_t Motor1_is_there_speed; // 标志位，指示速度是否为零
@@ -146,7 +148,7 @@ void EXTI0_IRQHandler(void)
 {
     if (EXTI_GetITStatus(EXTI_Line0) == SET)
     {
-        angle_pid.ki += 5;
+        ENCODER_PID.ki += 0.001;
         EXTI_ClearITPendingBit(EXTI_Line0);
     }
 }
@@ -155,7 +157,7 @@ void EXTI2_IRQHandler(void)
 {
     if (EXTI_GetITStatus(EXTI_Line2) == SET)
     {
-        angle_pid.ki -= 5;
+        ENCODER_PID.ki -= 0.001;
         EXTI_ClearITPendingBit(EXTI_Line2);
     }
 }
@@ -165,7 +167,7 @@ void EXTI1_IRQHandler(void)
     if (EXTI_GetITStatus(EXTI_Line1) == SET)
     {
 //        TIM_Cmd(TIM1, DISABLE);
-        angle_pid.kd += 0.1;
+        ENCODER_PID.kd += 0.001;
         EXTI_ClearITPendingBit(EXTI_Line1);
     }
 }
@@ -175,7 +177,7 @@ void EXTI3_IRQHandler(void)
     if (EXTI_GetITStatus(EXTI_Line3) == SET)
     {
 //        TIM_Cmd(TIM1, ENABLE);
-        angle_pid.kd -= 0.1;
+        ENCODER_PID.kd -= 0.001;
         EXTI_ClearITPendingBit(EXTI_Line3);
     }
 }
@@ -186,7 +188,7 @@ void EXTI4_IRQHandler(void)
     {
         if (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_5) == 0)
         {
-            angle_pid.kp -= 5;
+            ENCODER_PID.kp -= 0.001;
         }
         EXTI_ClearITPendingBit(EXTI_Line4);
     }
@@ -198,7 +200,7 @@ void EXTI9_5_IRQHandler(void)
     {
         if (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_4) == 0)
         {
-            angle_pid.kp += 5;
+            ENCODER_PID.kp += 0.001;
         }
         EXTI_ClearITPendingBit(EXTI_Line5);
     }

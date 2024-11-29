@@ -90,7 +90,7 @@ float Cascade_Pid_Control(float Med_Angle)
     }
     if(Pid_t % 10 == 0)                         // 角度环
     {
-        PidLocCtrl(&angle_pid, vel_pid.out - Pitch + Med_Angle);
+        PidLocCtrl(&angle_pid, vel_pid.out - Roll + Med_Angle);
     }
     PidLocCtrl(&acc_pid, -gyrox + angle_pid.out); // 角速度环
 
