@@ -21,7 +21,7 @@ void Timer_IC_Init(void)
     TIM_TimeBaseStructInit(&TIM_TimeBaseInitStructure);
     TIM_TimeBaseInitStructure.TIM_ClockDivision = TIM_CKD_DIV1;
     TIM_TimeBaseInitStructure.TIM_CounterMode = TIM_CounterMode_Up;
-    TIM_TimeBaseInitStructure.TIM_Period = 100 - 1; // 10ms为周期
+    TIM_TimeBaseInitStructure.TIM_Period = 20 - 1; // 2ms为周期
     TIM_TimeBaseInitStructure.TIM_Prescaler = 14400 - 1; // 10kHz -> 0.1ms计一次
     TIM_TimeBaseInitStructure.TIM_RepetitionCounter = 0;
     TIM_TimeBaseInit(TIM5, &TIM_TimeBaseInitStructure);

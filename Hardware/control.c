@@ -5,82 +5,99 @@
 #include "MPU6050.h"
 
 float Pitch,Roll,Yaw;						        //角度
-short aacx,aacy,aacz;		                        //角加速度
 short gyrox,gyroy,gyroz;	                        //角速度
-
-int Vertical_out,Velocity_out;                      //直立环&速度环的输出变量
 int PWM1;                                           //最终输出
-int Encoder_Motor;	                                //动量轮驱动电机编码器数据（速度）
 
+int16_t ECPULSE1;
 
-float Med_Angle=-0.4;	                                //机械中值---在这里修改你的机械中值即可。
-extern float Vertical_Kp, Vertical_Ki, Vertical_Kd, Velocity_Kp, Velocity_Ki;                 //速度环KP、KI
+extern pid_param_t vel_pid;   // 速度环
+extern pid_param_t angle_pid; // 角度环
+extern pid_param_t acc_pid;   // 角速度环
+
+float Siqu = 0;   // 死区
+float Med_Angle = 0.95;	                                //机械中值---在这里修改你的机械中值即可。
 extern DataPacket packet;
 
-
+//==========================================================
+//  函数名称：   PID_Control
+//  函数功能：  PID控制函数
+//  入口参数：   无
+//  返回参数：   无
+//==========================================================
 void PID_Control(void)
 {
-    Encoder_Motor=Motor1_GetFreq();          //1.采集编码器数据&MPU6050角度信息。
-
-    mpu_dmp_get_data(&Pitch,&Roll,&Yaw);        //角度
-    MPU_Get_Gyroscope(&gyrox,&gyroy,&gyroz);    //陀螺仪角速度
-    MPU_Get_Accelerometer(&aacx,&aacy,&aacz);   //角加速度
-
-    Vertical_out=Vertical(Med_Angle,Roll,gyrox);//直立环
-    Velocity_out=Velocity(Encoder_Motor);	    //速度环
-
-    //2.把控制输出量加载到电机上，完成最终的的控制。
-    PWM1=Vertical_out+Velocity_out;            //最终输出
+    PWM1=Cascade_Pid_Control(Med_Angle);
+    if (PWM1 > 0) PWM1 += Siqu;
+    if (PWM1 < 0) PWM1 -= Siqu;
     PWM_Limit(&PWM1);
-//    printf("Angle:%f, Kp:%f, Kd:%f, Vertical_out:%d\n", Roll, Vertical_Kp, Vertical_Kd, Vertical_out);
-//    printf("Speed:%d, Kp:%f, Ki:%f, Velocity_out:%d, PWM:%d\n", Encoder_Motor, Velocity_Kp, Velocity_Ki, Velocity_out, PWM1);
     Motor1_SetSpeed(PWM1);
     Motor_Stop(&Med_Angle, &Roll);
     packet.Roll = Roll;
-    packet.VerticalKp = Vertical_Kp;
-    packet.VerticalKi = Vertical_Ki;
-    packet.VerticalKd = Vertical_Kd;
-    packet.VerticalOut = Vertical_out;
-    packet.VelocityKp = Velocity_Kp;
-    packet.VelocityKi = Velocity_Ki;
-    packet.VelocityOut = Velocity_out;
 }
 
-/*********************
-直立环PD控制器：Kp*Ek+Kd*Ek_D
-入口：期望角度、真实角度、真实角速度
-出口：直立环输出
-*********************/
-int Vertical(float Med,float Angle,float gyro_x)
+//==========================================================
+//  函数名称：   constrain_float
+//  函数功能：   限幅函数
+//  入口参数：   amt：参数     low：最低值     high：最高值
+//  返回参数：   无
+//==========================================================
+float constrain_float(float amt, float low, float high)
 {
-	int PWM_out1;
-	static float Vertical_Err;
-	Vertical_Err += (Med - Angle);
-	if (Vertical_Err > +30) Vertical_Err = +30;
-    if (Vertical_Err < -30) Vertical_Err = -30;
-	PWM_out1 = Vertical_Kp * (Med-Angle) + Vertical_Ki * Vertical_Err + Vertical_Kd * (gyro_x);
-	return PWM_out1;
+  return ((amt)<(low)?(low):((amt)>(high)?(high):(amt)));
+}
+
+//==========================================================
+//  函数名称：   PidLocCtrl
+//  函数功能：   pid位置式控制器输出
+//  入口参数：   pid: pid参数                  error: pid输入误差
+//  返回参数：   PID输出结果
+//==========================================================
+float PidLocCtrl(pid_param_t * pid, float error)
+{
+  /* 累积误差 */
+  pid->integrator += error;
+
+  /* 误差限幅 */
+  pid->integrator = constrain_float(pid->integrator, -pid->imax, pid->imax);
+
+
+  pid->out_p = pid->kp * error;
+  pid->out_i = pid->ki * pid->integrator;
+  pid->out_d = pid->kd * (error - pid->last_error);
+
+  pid->last_error = error;
+
+  pid->out = pid->out_p + pid->out_i + pid->out_d;
+
+  return pid->out;
 }
 
 
-
-/*********************
-速度环PI：Kp*Ek+Ki*Ek_S
-*********************/
-int Velocity (int Encoder_motor)
+//==========================================================
+//  函数名称：   Cascade_Pid_Control
+//  函数功能：   串级控制函数
+//  入口参数：   机械中值
+//  返回参数：   角速度环输出
+//==========================================================
+float Cascade_Pid_Control(float Med_Angle)
 {
-	static int Encoder_S,EnC_Err_Lowout_last,PWM_out2,Encoder_Err,EnC_Err_Lowout;
-	float a=0.7;
-	
-	Encoder_Err=Encoder_motor;	                             //1.计算速度偏差
-    
-	//2.对速度偏差进行低通滤波:low_out=(1-a)*Ek+a*low_out_last
-	EnC_Err_Lowout=(1-a)*Encoder_Err+a*EnC_Err_Lowout_last; //使得波形更加平滑，滤除高频干扰，防止速度突变。
-	EnC_Err_Lowout_last=EnC_Err_Lowout;                     //防止速度过大的影响直立环的正常工作。
-    
-	Encoder_S+=EnC_Err_Lowout;                                               //3.对速度偏差积分，积分出位移
-	Encoder_S=Encoder_S>10000?10000:(Encoder_S<(-10000)?(-10000):Encoder_S);//4.积分限幅
-    
-	PWM_out2=Velocity_Kp*EnC_Err_Lowout+Velocity_Ki*Encoder_S;	            //5.速度环控制输出计算
-	return PWM_out2;
+    static int16_t Pid_t;
+    Pid_t += 2;
+    mpu_dmp_get_data(&Pitch,&Roll,&Yaw);        //角度
+    MPU_Get_Gyroscope(&gyrox,&gyroy,&gyroz);    //角速度
+    if (Pid_t % 100 == 0)                       // 速度环
+    {
+        Pid_t = 0;
+        ECPULSE1 = Motor1_GetFreq();
+        PidLocCtrl(&vel_pid, 0-ECPULSE1);
+    }
+    if(Pid_t % 10 == 0)                         // 角度环
+    {
+        PidLocCtrl(&angle_pid, vel_pid.out - Roll + Med_Angle);
+    }
+
+    PidLocCtrl(&acc_pid, -gyrox + angle_pid.out); // 角速度环
+
+    return acc_pid.out;
+
 }

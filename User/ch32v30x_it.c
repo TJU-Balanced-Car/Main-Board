@@ -12,6 +12,10 @@
 #include "ch32v30x_it.h"
 #include "debug.h"
 
+#define ENCODER_PID vel_pid
+
+u8 Debug_Ring;
+
 extern char Serial_RxPacket[100];
 extern uint8_t Serial_RxFlag;
 extern int32_t Motor1_is_there_speed; // 标志位，指示速度是否为零
@@ -19,7 +23,11 @@ extern int32_t Motor2_is_there_speed; // 标志位，指示速度是否为零
 extern int32_t Motor1_lastCapture; // 标志位，指示是否更新捕获
 extern int32_t Motor2_lastCapture; // 标志位，指示是否更新捕获
 extern int Servo_Angle;
-extern float Vertical_Kp, Vertical_Ki, Vertical_Kd, Velocity_Kp, Velocity_Ki;
+
+extern pid_param_t vel_pid;   // 速度环
+extern pid_param_t angle_pid; // 角度环
+extern pid_param_t acc_pid;   // 角速度环
+
 extern DataPacket packet;
 
 void NMI_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
@@ -142,9 +150,14 @@ void EXTI0_IRQHandler(void)
 {
     if (EXTI_GetITStatus(EXTI_Line0) == SET)
     {
-//        Vertical_Kd += 0.01;
-        Velocity_Kp += 0.01; Velocity_Ki = Velocity_Kp / 200;
-//        Velocity_Ki += 1.0;
+        switch (Debug_Ring)
+        {
+        case 0: angle_pid.ki += 0.001;break;
+        case 1: acc_pid.kd += 0.001;break;
+        case 2: vel_pid.kd += 0.00001;break;
+        default: break;
+        }
+//        ENCODER_PID.kd += 0.001;
         EXTI_ClearITPendingBit(EXTI_Line0);
     }
 }
@@ -153,9 +166,14 @@ void EXTI2_IRQHandler(void)
 {
     if (EXTI_GetITStatus(EXTI_Line2) == SET)
     {
-//        Vertical_Kd += -0.01;
-        Velocity_Kp += -0.01; Velocity_Ki = Velocity_Kp / 200;
-//        Velocity_Ki += 1.0;
+        switch (Debug_Ring)
+        {
+        case 0: angle_pid.ki -= 0.001;break;
+        case 1: acc_pid.kd -= 0.001;break;
+        case 2: vel_pid.kd -= 0.00001;break;
+        default: break;
+        }
+//        ENCODER_PID.kd -= 0.001;
         EXTI_ClearITPendingBit(EXTI_Line2);
     }
 }
@@ -165,7 +183,15 @@ void EXTI1_IRQHandler(void)
     if (EXTI_GetITStatus(EXTI_Line1) == SET)
     {
 //        TIM_Cmd(TIM1, DISABLE);
-        Vertical_Kd += 0.01;
+//        ENCODER_PID.kd += 0.001;
+        if (Debug_Ring > 1)
+        {
+            Debug_Ring = 0;
+        }
+        else
+        {
+            Debug_Ring ++;
+        }
         EXTI_ClearITPendingBit(EXTI_Line1);
     }
 }
@@ -174,9 +200,16 @@ void EXTI3_IRQHandler(void)
 {
     if (EXTI_GetITStatus(EXTI_Line3) == SET)
     {
-        Vertical_Kd += -0.01;
-//        Velocity_Ki += -1.0;
 //        TIM_Cmd(TIM1, ENABLE);
+//        ENCODER_PID.kd -= 0.001;
+        if (Debug_Ring > 1)
+        {
+            Debug_Ring = 0;
+        }
+        else
+        {
+            Debug_Ring ++;
+        }
         EXTI_ClearITPendingBit(EXTI_Line3);
     }
 }
@@ -187,8 +220,14 @@ void EXTI4_IRQHandler(void)
     {
         if (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_5) == 0)
         {
-//            Vertical_Ki += 0.5;
-            Vertical_Kp += -5;
+            switch (Debug_Ring)
+            {
+            case 0: angle_pid.kp -= 1;break;
+            case 1: acc_pid.kp -= 0.001;break;
+            case 2: vel_pid.kp -= 0.000001;break;
+            default: break;
+            }
+//            ENCODER_PID.kp -= 0.0001;
         }
         EXTI_ClearITPendingBit(EXTI_Line4);
     }
@@ -200,8 +239,14 @@ void EXTI9_5_IRQHandler(void)
     {
         if (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_4) == 0)
         {
-//            Vertical_Ki += -0.5;
-            Vertical_Kp += 5;
+            switch (Debug_Ring)
+            {
+            case 0: angle_pid.kp += 1;break;
+            case 1: acc_pid.kp += 0.001;break;
+            case 2: vel_pid.kp += 0.000001;break;
+            default: break;
+            }
+//            ENCODER_PID.kp += 0.0001;
         }
         EXTI_ClearITPendingBit(EXTI_Line5);
     }

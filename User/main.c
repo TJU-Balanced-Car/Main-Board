@@ -33,9 +33,11 @@ volatile int32_t Motor2_is_there_speed = 1; // 标志位，指示速度是否为
 volatile int32_t Motor1_lastCapture = 1; // 标志位，指示是否更新捕获
 volatile int32_t Motor2_lastCapture = 1; // 标志位，指示是否更新捕获
 volatile int Servo_Angle = 0;
-float Vertical_Kp=315, Vertical_Ki=35, Vertical_Kd=-1.17;               //直立环KP、KD 675 52 -1.35
-//float Vertical_Kp=425, Vertical_Ki=35, Vertical_Kd=-1.22;
-float Velocity_Kp=-0, Velocity_Ki=-0.00;                               //速度环KP、KI-1.6 -0.007
+//这里进行参数的初始化，结构体定义的数值按照顺序定义
+//依次为  kp  ki  kd  积分限幅
+pid_param_t vel_pid =   {0.000522   ,  0.00  ,  0.000150     ,  0      , 0,0,0,0,0,0,0}; // 速度环
+pid_param_t angle_pid = {552.0  ,  0.0    ,  0     ,  200    , 0,0,0,0,0,0,0}; // 角度环
+pid_param_t acc_pid =   {2.259  ,  0  ,  2.901 ,  100.00 , 0,0,0,0,0,0,0}; // 角速度环
 //uint32_t TIM2_rpm = 0;
 //uint8_t TIM2_direction = 0;
 DataPacket packet = {
@@ -43,13 +45,6 @@ DataPacket packet = {
     .Motor1Speed = 100,
     .Motor2Speed = 200,
     .ServoAngle = 45,
-    .VerticalKp = 1.0f,
-    .VerticalKi = 0.5f,
-    .VerticalKd = 0.2f,
-    .VerticalOut = 10,
-    .VelocityKp = 1.5f,
-    .VelocityKi = 0.7f,
-    .VelocityOut = 20
 };
 
 /*********************************************************************
@@ -89,11 +84,15 @@ int main(void)
     Timer_IC_Init();
 	while(1)
     {
-        Delay_Ms(300);
-        printf("R:%f,M1:%d,M2:%d,S:%d,Lp:%f,Li:%f,Ld:%f,Lo:%d,Yp:%f,Yi:%f,Yo:%d\n",
-                packet.Roll, packet.Motor1Speed, packet.Motor2Speed, packet.ServoAngle,
-                packet.VerticalKp, packet.VerticalKi, packet.VerticalKd, packet.VerticalOut,
-                packet.VelocityKp, packet.VelocityKi, packet.VelocityOut);
+        Delay_Ms(100);
+        printf("R:%f,M1:%d,M2:%d,S:%d,"
+                "Vp:%f,Vi:%f,Vd:%f,Vo:%f,"      // 速度环
+                "Ap:%f,Ai:%f,Ad:%f,Ao:%f"       // 角度环
+                "Cp:%f,Ci:%f,Cd:%f,Co:%f\n",    // 角速度环
+                packet.Roll,  packet.Motor1Speed, packet.Motor2Speed, packet.ServoAngle,
+                vel_pid.kp,   vel_pid.ki,         vel_pid.kd,         vel_pid.out,    // 速度环
+                angle_pid.kp, angle_pid.ki,       angle_pid.kd,       angle_pid.out,  // 角度环
+                acc_pid.kp,   acc_pid.ki,         acc_pid.kd,         acc_pid.out);   // 角速度环
 //	    printf("duty1: %d, dir1: %d, duty2: %d, dir2: %d\n", Motor1_GetFreq(), Motor1_GetDir(), Motor2_GetFreq(), Motor2_GetDir());
 
 //	    printf("ID:%d, AX:%d, AY:%d, AZ:%d, GX:%d, GY:%d, GZ:%d\n", ID,
