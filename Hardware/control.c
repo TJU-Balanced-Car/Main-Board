@@ -14,8 +14,8 @@ extern pid_param_t vel_pid;   // 速度环
 extern pid_param_t angle_pid; // 角度环
 extern pid_param_t acc_pid;   // 角速度环
 
-
-float Med_Angle=-0.4;	                                //机械中值---在这里修改你的机械中值即可。
+float Siqu = 0;   // 死区
+float Med_Angle = 2.5;	                                //机械中值---在这里修改你的机械中值即可。
 extern DataPacket packet;
 
 //==========================================================
@@ -27,6 +27,8 @@ extern DataPacket packet;
 void PID_Control(void)
 {
     PWM1=Cascade_Pid_Control(Med_Angle);
+    if (PWM1 > 0) PWM1 += Siqu;
+    if (PWM1 < 0) PWM1 -= Siqu;
     PWM_Limit(&PWM1);
     Motor1_SetSpeed(PWM1);
     Motor_Stop(&Med_Angle, &Roll);

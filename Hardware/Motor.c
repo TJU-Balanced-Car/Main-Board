@@ -206,10 +206,10 @@ void Motor_Stop(float *Mid_Angle, float *Angle)
     {
         Motor1_SetSpeed(0);
         Motor2_SetSpeed(0);
-        Buzzer_Ring();
+//        Buzzer_Ring();
     }
     else {
-        Buzzer_Stop();
+//        Buzzer_Stop();
     }
 }
 

@@ -35,9 +35,9 @@ volatile int32_t Motor2_lastCapture = 1; // 标志位，指示是否更新捕获
 volatile int Servo_Angle = 0;
 //这里进行参数的初始化，结构体定义的数值按照顺序定义
 //依次为  kp  ki  kd  积分限幅
-pid_param_t vel_pid =   {0.0   ,  0.00  ,  0     ,  0      , 0,0,0,0,0,0,0}; // 速度环
-pid_param_t angle_pid = {700.0  ,  0.0    ,  0     ,  200    , 0,0,0,0,0,0,0}; // 角度环
-pid_param_t acc_pid =   {1  ,  2.1  ,  2.8 ,  100.00 , 0,0,0,0,0,0,0}; // 角速度环
+pid_param_t vel_pid =   {0.000522   ,  0.00  ,  0.000150     ,  0      , 0,0,0,0,0,0,0}; // 速度环
+pid_param_t angle_pid = {552.0  ,  0.0    ,  0     ,  200    , 0,0,0,0,0,0,0}; // 角度环
+pid_param_t acc_pid =   {2.259  ,  0  ,  2.901 ,  100.00 , 0,0,0,0,0,0,0}; // 角速度环
 //uint32_t TIM2_rpm = 0;
 //uint8_t TIM2_direction = 0;
 DataPacket packet = {
