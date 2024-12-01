@@ -15,7 +15,7 @@ extern pid_param_t angle_pid; // 角度环
 extern pid_param_t acc_pid;   // 角速度环
 
 float Siqu = 0;   // 死区
-float Med_Angle = 2.5;	                                //机械中值---在这里修改你的机械中值即可。
+float Med_Angle = 0.95;	                                //机械中值---在这里修改你的机械中值即可。
 extern DataPacket packet;
 
 //==========================================================
@@ -72,6 +72,7 @@ float PidLocCtrl(pid_param_t * pid, float error)
   return pid->out;
 }
 
+
 //==========================================================
 //  函数名称：   Cascade_Pid_Control
 //  函数功能：   串级控制函数
@@ -83,7 +84,7 @@ float Cascade_Pid_Control(float Med_Angle)
     static int16_t Pid_t;
     Pid_t += 2;
     mpu_dmp_get_data(&Pitch,&Roll,&Yaw);        //角度
-    MPU_Get_Gyroscope(&gyrox,&gyroy,&gyroz);    //陀螺仪角速度
+    MPU_Get_Gyroscope(&gyrox,&gyroy,&gyroz);    //角速度
     if (Pid_t % 100 == 0)                       // 速度环
     {
         Pid_t = 0;
@@ -94,7 +95,9 @@ float Cascade_Pid_Control(float Med_Angle)
     {
         PidLocCtrl(&angle_pid, vel_pid.out - Roll + Med_Angle);
     }
+
     PidLocCtrl(&acc_pid, -gyrox + angle_pid.out); // 角速度环
 
     return acc_pid.out;
+
 }

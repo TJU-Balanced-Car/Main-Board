@@ -152,7 +152,7 @@ void EXTI0_IRQHandler(void)
     {
         switch (Debug_Ring)
         {
-        case 0: angle_pid.kd += 0.001;break;
+        case 0: angle_pid.ki += 0.001;break;
         case 1: acc_pid.kd += 0.001;break;
         case 2: vel_pid.kd += 0.00001;break;
         default: break;
@@ -168,7 +168,7 @@ void EXTI2_IRQHandler(void)
     {
         switch (Debug_Ring)
         {
-        case 0: angle_pid.kd -= 0.001;break;
+        case 0: angle_pid.ki -= 0.001;break;
         case 1: acc_pid.kd -= 0.001;break;
         case 2: vel_pid.kd -= 0.00001;break;
         default: break;
